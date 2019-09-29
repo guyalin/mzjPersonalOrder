@@ -5,17 +5,17 @@
 
     <insert id="saveArticleRecords" parameterType="list">
         insert ignore into t_net_article (
-            root_url,title,target_url,article_name,article_title,area,date_time
+            root_url,connect_url,title,target_url,article_name,article_title,area,date_time
         ) values
         <foreach item="item" collection="list" separator=",">
-            (#{item.rootUrl},#{item.urlTitle},#{item.targetUrl},#{item.articleName},
+            (#{item.rootUrl},#{item.connectUrl},#{item.urlTitle},#{item.targetUrl},#{item.articleName},
              #{item.articleTitle},#{item.area},#{item.dateTime})
         </foreach>
     </insert>
 
     <select id="queryArticleRecordsByParams" parameterType="com.woniu.mzjOrder.vo.NetInfoQueryParamVo"
             resultType="com.woniu.mzjOrder.entity.ArticleRecord">
-        select root_url as rootUrl,title as urlTitle,target_url as targetUrl,
+        select root_url as rootUrl,connect_url as connectUrl, title as urlTitle,target_url as targetUrl,
                article_name as articleName,article_title as articleTitle,area,date_time as dateTime
         from t_net_article
         where 1 = 1
@@ -31,6 +31,16 @@
                 article_title LIKE CONCAT('%', #{paramVo.articleTitleRegex}, '%')
             </foreach>
         </if>
-        order by date_time desc;
+        <if test="paramVo.descType != null and paramVo.descType == 1">
+            order by article_name, date_time desc
+        </if>
+        <if test="paramVo.descType != null and paramVo.descType == 0">
+            order by date_time desc, article_name
+        </if>
+    </select>
+    <select id="queryNetUrlEntity" resultType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
+        select name, area, root_url as rootUrl, connect_url as connectUrl, target_url_pattern as targetUrlPattern
+        from t_net_url
+        where active = 1;
     </select>
 </mapper>

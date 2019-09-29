@@ -28,7 +28,8 @@ public class LocalFileWriterBean {
             init();
         }
         for (ArticleRecord record : records) {
-            pw.println("area : " + record.getArea());
+            //pw.println("area : " + record.getArea());
+            pw.println("department: "+ record.getArticleName());
             pw.println("link : " + record.getTargetUrl());
             pw.println("text : " + record.getArticleTitle());
             pw.println("date : " + DateUtil.DateToString(record.getDateTime()));

@@ -12,6 +12,7 @@ public class DateUtil {
     static DateFormat dateformat_nor = new SimpleDateFormat("yyyy-MM-dd HH:00:00");
     static DateFormat dateformat_nor_nonitor = new SimpleDateFormat("yyyy-MM-dd HH:mm:00");
     static DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+    static DateFormat format2 = new SimpleDateFormat("yyyy.MM.dd");
 
 
     /**
@@ -76,7 +77,10 @@ public class DateUtil {
         try{
             if (timeStr.matches("[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]")){
                 time=format1.parse(timeStr);
+            }else if (timeStr.matches("[0-9]{4}\\.[0-1]{0,1}[0-9]\\.[0-3]{0,1}[0-9]")){
+                time=format2.parse(timeStr);
             }
+
 
         }catch (Exception e){
             e.getStackTrace();

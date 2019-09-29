@@ -3,10 +3,12 @@ package com.woniu.mzjOrder.service.impl;
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
 import com.woniu.mzjOrder.dao.NetInformationDao;
 import com.woniu.mzjOrder.entity.ArticleRecord;
+import com.woniu.mzjOrder.entity.UrlMonitorEntity;
+import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
-import com.woniu.mzjOrder.vo.NetInfoRule;
-import com.woniu.mzjOrder.vo.NetInfoRuleListBean;
+import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,12 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.util.*;
 
+@Slf4j
 @Service
 public class NetInformationServiceImpl implements NetInformationService {
 
     @Autowired
-    private NetInfoRuleListBean infoRuleListBean;
+    private NetInfoRuleMapBean infoRuleMapBean;
     // 本地下载类
     @Autowired
     private LocalFileWriterBean localFileWriterBean;
@@ -33,12 +36,21 @@ public class NetInformationServiceImpl implements NetInformationService {
     @Override
     public void loadNetNewsArticleToDB() throws IOException {
         List<ArticleRecord> articleList = new ArrayList<>();
-        List<NetInfoRule> infoRules =  infoRuleListBean.getNetInfoRules();
+        List<UrlMonitorEntity> UrlEntities =  informationDao.queryNetUrlEntity();
+        Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
 
-        for (NetInfoRule rule : infoRules) {
-            Document document = Jsoup.connect(rule.getRootUrl()).timeout(3000).get();
-            List<ArticleRecord> records = rule.getProcessor().findAndExplain(document);
-            articleList.addAll(records);
+        for (UrlMonitorEntity urlEntity : UrlEntities) {
+            try{
+                DocumentProcessor processor = allProcessorMap.get(urlEntity.getName());
+                Document document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(3000).get();
+                if (processor != null) {
+                    List<ArticleRecord> records = processor.findAndExplain(document, urlEntity);
+                    articleList.addAll(records);
+                }
+            }catch (Exception e){
+                log.error("网址解析异常:{}",e.toString());
+                continue;
+            }
         }
         saveToDB(articleList);
     }

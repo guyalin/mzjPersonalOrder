@@ -1,18 +1,16 @@
 package com.woniu.mzjOrder.configuration;
 
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
-import com.woniu.mzjOrder.service.processor.ProcessorForGov_zjjxw;
-import com.woniu.mzjOrder.vo.NetInfoRule;
-import com.woniu.mzjOrder.vo.NetInfoRuleListBean;
+import com.woniu.mzjOrder.service.DocumentProcessor;
+import com.woniu.mzjOrder.service.processor.*;
+import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class NetInfoRuleBeanConfig{
@@ -22,18 +20,23 @@ public class NetInfoRuleBeanConfig{
      * @return
      */
     @Bean
-    public NetInfoRuleListBean netInfoRuleListBean(){
-        NetInfoRuleListBean infoRuleListBean = new NetInfoRuleListBean();
-        List<NetInfoRule> infoRules = new ArrayList<>();
-        //浙江省经济和信息化厅
-        NetInfoRule infoRule1 = new NetInfoRule();
-        infoRule1.setRootUrl("http://www.zjjxw.gov.cn/col/col1582899/index.html");
-        infoRule1.setTargetUrlPattern("http://www.zjjxw.gov.cn/art/\\d{4}/\\d{1,2}/\\d{1,2}/art_1582899_.*?.html");  //http://www.zjjxw.gov.cn/art/2019/9/19/art_1582899_20439.html
-        infoRule1.setProcessor(new ProcessorForGov_zjjxw());
-        infoRules.add(infoRule1);
-
-        infoRuleListBean.setNetInfoRules(infoRules);
-        return infoRuleListBean;
+    public NetInfoRuleMapBean netInfoRuleListBean(){
+        NetInfoRuleMapBean infoRuleMapBean = new NetInfoRuleMapBean();
+        Map<String, DocumentProcessor> documentProcessorMap = new HashMap<>();
+        documentProcessorMap.put("浙江经信委", new ProcessorForGov_zjjxw());
+        documentProcessorMap.put("江苏人民政府", new ProcessorForGov_jsrmzf());
+        documentProcessorMap.put("江苏工信厅", new ProcessorForGov_jsgxt());
+        documentProcessorMap.put("江苏发改委", new ProcessorForGov_jsfgw());
+        documentProcessorMap.put("上海市政府", new ProcessorForGov_shszf());
+        documentProcessorMap.put("上海经信委", new ProcessorForGov_shjxw());
+        documentProcessorMap.put("上海发改委", new ProcessorForGov_shfgw());
+        documentProcessorMap.put("中国经信部", new ProcessorForGov_zgjxb());
+        documentProcessorMap.put("深圳工信局", new ProcessorForGov_szgxj());
+        documentProcessorMap.put("全球技术地图-信息", new ProcessorForGov_qqjsdt());
+        documentProcessorMap.put("全球技术地图-航空", new ProcessorForGov_qqjsdt());
+        documentProcessorMap.put("全球技术地图-航天", new ProcessorForGov_qqjsdt());
+        infoRuleMapBean.setNetInfoRules(documentProcessorMap);
+        return infoRuleMapBean;
     }
 
     /**
