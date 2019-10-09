@@ -10,7 +10,7 @@ import org.jsoup.select.Elements;
 
 import java.util.List;
 
-public class ProcessorForGov_zgjxb implements DocumentProcessor {
+public class ProcessorForGov_zggxb implements DocumentProcessor {
     @Override
     public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords;

@@ -34,6 +34,7 @@ public interface DocumentProcessor {
             Element link = e.select(nodeRule.getUrlTag()).first();
             String linkStr = link.attr("href").replaceFirst("\\.\\./","/");
             linkStr= linkStr.replaceAll("\\.\\./","");
+            linkStr= linkStr.replaceAll("\\./","/");
             if (!linkStr.startsWith("http:") && !linkStr.startsWith("https:")){
                 linkStr = urlMonitorEntity.getRootUrl().concat(linkStr);
             }

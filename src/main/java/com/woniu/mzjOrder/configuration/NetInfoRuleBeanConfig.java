@@ -30,8 +30,9 @@ public class NetInfoRuleBeanConfig{
         documentProcessorMap.put("上海市政府", new ProcessorForGov_shszf());
         documentProcessorMap.put("上海经信委", new ProcessorForGov_shjxw());
         documentProcessorMap.put("上海发改委", new ProcessorForGov_shfgw());
-        documentProcessorMap.put("中国经信部", new ProcessorForGov_zgjxb());
+        documentProcessorMap.put("中国工信部", new ProcessorForGov_zggxb());
         documentProcessorMap.put("深圳工信局", new ProcessorForGov_szgxj());
+        documentProcessorMap.put("广东经信委", new ProcessorForGov_gdjxw());
         documentProcessorMap.put("全球技术地图-信息", new ProcessorForGov_qqjsdt());
         documentProcessorMap.put("全球技术地图-航空", new ProcessorForGov_qqjsdt());
         documentProcessorMap.put("全球技术地图-航天", new ProcessorForGov_qqjsdt());
