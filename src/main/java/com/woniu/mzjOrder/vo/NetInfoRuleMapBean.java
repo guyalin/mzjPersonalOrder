@@ -9,4 +9,5 @@ import java.util.Map;
 public class NetInfoRuleMapBean {
 
     private Map<String, DocumentProcessor> netInfoRules;
+    private Map<String, Integer> netIsActiveNodeMap;
 }

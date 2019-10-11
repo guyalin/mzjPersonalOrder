@@ -3,7 +3,10 @@ package com.woniu.mzjOrder.service.processor;
 import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.service.DocumentProcessor;
+import com.woniu.mzjOrder.vo.DateRule;
 import com.woniu.mzjOrder.vo.NodeRule;
+import com.woniu.mzjOrder.vo.TextLocationEnum;
+import com.woniu.mzjOrder.vo.TitleRule;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,16 +18,13 @@ import java.util.List;
 public class ProcessorForGov_shszf implements DocumentProcessor {
     @Override
     public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
-        try{
-            List<ArticleRecord> articleRecords;
-            Element e = document.select("ul.uli14").first();
-            Elements es = e.select("li");
-            NodeRule nodeRule = new NodeRule("","a[href]","span", false,1);
-            articleRecords = elementsAnalysisType1(es, document, urlMonitorEntity, nodeRule);
-            return articleRecords;
-        }catch (Exception e){
-            log.error("网址解析异常:{}",e.toString());
-            return null;
-        }
+        List<ArticleRecord> articleRecords;
+        Element e = document.select("ul.uli14").first();
+        Elements es = e.select("li");
+        TitleRule titleRule = new TitleRule("a[href]", 0, false, true, "title");
+        DateRule dateRule = new DateRule("span", 0, TextLocationEnum.OWNER, "");
+        NodeRule nodeRule = new NodeRule("a[href]", titleRule, dateRule);
+        articleRecords = elementsAnalysisType2(es, document, urlMonitorEntity, nodeRule);
+        return articleRecords;
     }
 }

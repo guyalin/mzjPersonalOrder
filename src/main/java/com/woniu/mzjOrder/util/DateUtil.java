@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateUtil {
 
@@ -13,6 +15,9 @@ public class DateUtil {
     static DateFormat dateformat_nor_nonitor = new SimpleDateFormat("yyyy-MM-dd HH:mm:00");
     static DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
     static DateFormat format2 = new SimpleDateFormat("yyyy.MM.dd");
+    static DateFormat format3 = new SimpleDateFormat("yyyy年MM月dd日");
+    static DateFormat format4 = new SimpleDateFormat("yyyy/MM/dd");
+    static DateFormat format5 = new SimpleDateFormat("[yyyy-MM-dd]");
 
 
     /**
@@ -79,13 +84,32 @@ public class DateUtil {
                 time=format1.parse(timeStr);
             }else if (timeStr.matches("[0-9]{4}\\.[0-1]{0,1}[0-9]\\.[0-3]{0,1}[0-9]")){
                 time=format2.parse(timeStr);
+            }else if (timeStr.matches("[0-9]{4}年[0-1]{0,1}[0-9]月[0-3]{0,1}[0-9]日")){
+                time=format3.parse(timeStr);
+            }else if (timeStr.matches("[0-9]{4}/[0-1]{0,1}[0-9]/[0-3]{0,1}[0-9]")){
+                time = format4.parse(timeStr);
+            }else if (timeStr.matches("\\[[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]\\]")){
+                time = format5.parse(timeStr);
             }
-
-
         }catch (Exception e){
             e.getStackTrace();
         }
         return time;
+    }
+
+    /**
+     * 在字符串数据文本中提取日期字符串
+     */
+    public static String extractDataStr(String sourceText, String pattern){
+        String dataStr = "";
+        String regex = pattern;
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(sourceText);
+        while (m.find()){
+            dataStr = m.group();
+            break;
+        }
+        return dataStr;
     }
 
 }
