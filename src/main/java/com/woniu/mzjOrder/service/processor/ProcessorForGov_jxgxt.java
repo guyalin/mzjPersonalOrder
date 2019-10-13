@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ProcessorForGov_jxgxt implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords;
         Element e = document.select("td.news").first();
         Elements es = e.select("tr");

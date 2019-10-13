@@ -28,4 +28,11 @@ public class NodeRule {
         this.titleRule = titleRule;
         this.dateRule = dateRule;
     }
+
+    public NodeRule(String recordTag, String urlTag, TitleRule titleRule, DateRule dateRule){
+        this.recordTag = recordTag;
+        this.urlTag = urlTag;
+        this.titleRule = titleRule;
+        this.dateRule = dateRule;
+    }
 }

@@ -97,19 +97,5 @@ public class DateUtil {
         return time;
     }
 
-    /**
-     * 在字符串数据文本中提取日期字符串
-     */
-    public static String extractDataStr(String sourceText, String pattern){
-        String dataStr = "";
-        String regex = pattern;
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(sourceText);
-        while (m.find()){
-            dataStr = m.group();
-            break;
-        }
-        return dataStr;
-    }
 
 }

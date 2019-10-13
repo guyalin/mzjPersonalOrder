@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ProcessorForGov_gdrmzf implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords;
         Element e = document.select("div.viewList").first();
         Elements es = e.select("li");

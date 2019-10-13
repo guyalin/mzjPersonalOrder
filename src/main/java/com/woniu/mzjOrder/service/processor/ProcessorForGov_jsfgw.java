@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ProcessorForGov_jsfgw implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords;
         Elements es = baseCDataTypeAnalysis(document, "3227","record");
         TitleRule titleRule = new TitleRule("a[href]",0,false,true,"title");

@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class ProcessorForGov_shszf implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords;
         Element e = document.select("ul.uli14").first();
         Elements es = e.select("li");

@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ProcessorForGov_zgkjb implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords = null;
         Element eRoot = document.select("div.rowInRecord").first();
         Element tBody = eRoot.select("tbody").first();

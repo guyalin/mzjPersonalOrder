@@ -3,9 +3,8 @@ package com.woniu.mzjOrder.service;
 import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.util.DateUtil;
-import com.woniu.mzjOrder.vo.DateRule;
-import com.woniu.mzjOrder.vo.NodeRule;
-import com.woniu.mzjOrder.vo.TitleRule;
+import com.woniu.mzjOrder.util.DocumentUtil;
+import com.woniu.mzjOrder.vo.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,6 +24,7 @@ public interface DocumentProcessor {
         Elements es = docPart.select(recordTag);
         return es;
     }
+
 
     default List<ArticleRecord> elementsAnalysisType1(Elements es, Document document,
                                                       UrlMonitorEntity urlMonitorEntity, NodeRule nodeRule) {
@@ -93,8 +93,8 @@ public interface DocumentProcessor {
                 record.setUrlTitle(document.title());
 
                 DateRule dateRule = nodeRule.getDateRule();
-                String date;
-                switch (dateRule.getLocation()) {
+                String date = DocumentUtil.getLocationText(sourceRecord, dateRule.getLocation(), dateRule.getDateTag(), dateRule.getDateTagIndex(), dateRule.getFilterStr());
+                /*switch (dateRule.getLocation()) {
                     case OWNER: date = sourceRecord.select(dateRule.getDateTag()).get(dateRule.getDateTagIndex()).ownText();
                         break;
                     case ATTR: date = sourceRecord.select(dateRule.getDateTag()).
@@ -110,7 +110,7 @@ public interface DocumentProcessor {
                         break;
                     default: date = null;
                         break;
-                }
+                }*/
                 Date dateTime = DateUtil.StringToDate(date);
                 record.setDateTime(dateTime);
                 record.setTargetUrl(linkStr);
@@ -137,5 +137,6 @@ public interface DocumentProcessor {
 
     }
 
-    List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity);
+    List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity);
+
 }

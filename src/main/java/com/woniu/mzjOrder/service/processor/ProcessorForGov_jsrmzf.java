@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ProcessorForGov_jsrmzf implements DocumentProcessor {
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords = new ArrayList<>();
         Elements es = document.select("tr.tr_main_value_odd, tr.tr_main_value_even");
         TitleRule titleRule = new TitleRule("a[href]",0,false,true,"title");

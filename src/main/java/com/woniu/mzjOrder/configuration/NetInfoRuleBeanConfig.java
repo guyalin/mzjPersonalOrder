@@ -6,7 +6,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.processor.*;
+import com.woniu.mzjOrder.vo.ChildDocumentRule;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
+import com.woniu.mzjOrder.vo.TextLocationEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,8 @@ public class NetInfoRuleBeanConfig{
         NetInfoRuleMapBean infoRuleMapBean = new NetInfoRuleMapBean();
         Map<String, DocumentProcessor> documentProcessorMap = new HashMap<>();
         Map<String, Integer> netIsActiveNodeMap = new HashMap<>();
+        Map<String, Integer> hasChildNetSiteMap = new HashMap<>();
+        Map<String, ChildDocumentRule> childDocumentRuleMap = new HashMap<>();
         documentProcessorMap.put("安徽经信厅", new ProcessorForGov_ahjxt());
         netIsActiveNodeMap.put("安徽经信厅", 0);
         documentProcessorMap.put("湖南工信厅", new ProcessorForGov_hngxt());
@@ -57,6 +61,13 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("国务院", 0);
         documentProcessorMap.put("中国发改部", new ProcessorForGov_zgfgb());
         netIsActiveNodeMap.put("中国发改部", 0);
+        documentProcessorMap.put("中国商务部", new ProcessorForGov_zgswb());
+        netIsActiveNodeMap.put("中国商务部", 0);
+        hasChildNetSiteMap.put("中国商务部",1);
+        ChildDocumentRule childDocumentRule = new ChildDocumentRule("section.f-mt20","header.listTitle_01 h3",0, TextLocationEnum.OWNER, "",
+                "ul.u-newsList02 li", "a[href]", 0, TextLocationEnum.ATTR,"href",
+                "a[href]",0,TextLocationEnum.OWNER, "");
+        childDocumentRuleMap.put("中国商务部",childDocumentRule);
         documentProcessorMap.put("深圳工信局", new ProcessorForGov_szgxj());
         netIsActiveNodeMap.put("深圳工信局", 0);
         documentProcessorMap.put("深圳市政府", new ProcessorForGov_szszf());
@@ -81,6 +92,8 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("山西经信厅", 0);
         infoRuleMapBean.setNetInfoRules(documentProcessorMap);
         infoRuleMapBean.setNetIsActiveNodeMap(netIsActiveNodeMap);
+        infoRuleMapBean.setHasChildNetSiteMap(hasChildNetSiteMap);
+        infoRuleMapBean.setChildDocumentRuleMap(childDocumentRuleMap);
         return infoRuleMapBean;
     }
 

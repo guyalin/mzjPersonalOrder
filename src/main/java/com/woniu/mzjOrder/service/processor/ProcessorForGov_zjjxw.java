@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class ProcessorForGov_zjjxw implements DocumentProcessor {
 
     @Override
-    public List<ArticleRecord> findAndExplain(Document document, UrlMonitorEntity urlMonitorEntity) {
+    public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> articleRecords = new ArrayList<>();
         Elements es = baseCDataTypeAnalysis(document, "4809328","record");
         TitleRule titleRule = new TitleRule("a[href]",0,false,true,"title");

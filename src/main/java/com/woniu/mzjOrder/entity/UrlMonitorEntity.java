@@ -11,7 +11,9 @@ public class UrlMonitorEntity {
     private String connectUrl;
     private String targetUrlPattern;
 
-    public UrlMonitorEntity(String rootUrl, String connectUrl, String targetUrlPattern){
+    public UrlMonitorEntity(String area,String name, String rootUrl, String connectUrl, String targetUrlPattern){
+        this.area = area;
+        this.name = name;
         this.rootUrl = rootUrl;
         this.connectUrl = connectUrl;
         this.targetUrlPattern = targetUrlPattern;
