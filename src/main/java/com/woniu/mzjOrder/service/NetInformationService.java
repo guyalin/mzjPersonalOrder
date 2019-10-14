@@ -22,7 +22,7 @@ public interface NetInformationService {
 
     void queryNetNewsArticleToFile(NetInfoQueryParamVo infoQueryParamVo) throws FileNotFoundException;
 
-    default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, ChildDocumentRule childDocumentRule, String parentName){
+    default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, ChildDocumentRule childDocumentRule, String parentName, String parentArea){
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();
 
         String childRootTag = childDocumentRule.getRootTag();
@@ -42,7 +42,8 @@ public interface NetInformationService {
 
         Element rootE = rootDocument.select(childRootTag).first();
         //String entityArea = rootE.select(rootAreaTag).first().ownText(); //所有子地区的所属公共地区名
-        String entityArea = DocumentUtil.getLocationText(rootE, areaLocation, rootAreaTag, rootAreaTagIndex, areaAttrName); //所有子地区的所属公共地区名
+        //String entityArea = DocumentUtil.getLocationText(rootE, areaLocation, rootAreaTag, rootAreaTagIndex, areaAttrName); //所有子地区的所属公共地区名
+        String entityArea = parentArea;
         Elements childRecords = rootE.select(recordTag);
 
         for (Element childRecord : childRecords) {
