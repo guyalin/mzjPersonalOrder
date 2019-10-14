@@ -81,7 +81,7 @@ public class NetInformationServiceImpl implements NetInformationService {
                 //深度优先加载每个子页面
                 if (hasChildSite!= null && hasChildSite == 1) {
                     //List<ArticleRecord> recordList = new ArrayList<>();
-                    List<UrlMonitorEntity> monitorEntities = getChildMonitorEntity(document, childDocumentRuleMap.get(urlEntity.getName()), urlEntity.getName());
+                    List<UrlMonitorEntity> monitorEntities = getChildMonitorEntity(document, childDocumentRuleMap.get(urlEntity.getName()), urlEntity.getName(), urlEntity.getArea());
                     for (UrlMonitorEntity monitorEntity : monitorEntities) {
                         processorMap.put(monitorEntity.getName(),processor);
                     }

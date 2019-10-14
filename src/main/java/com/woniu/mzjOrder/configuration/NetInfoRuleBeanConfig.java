@@ -64,10 +64,11 @@ public class NetInfoRuleBeanConfig{
         documentProcessorMap.put("中国商务部", new ProcessorForGov_zgswb());
         netIsActiveNodeMap.put("中国商务部", 0);
         hasChildNetSiteMap.put("中国商务部",1);
-        ChildDocumentRule childDocumentRule = new ChildDocumentRule("section.f-mt20","header.listTitle_01 h3",0, TextLocationEnum.OWNER, "",
+        childDocumentRuleMap.put("中国商务部",
+                new ChildDocumentRule("section.f-mt20","header.listTitle_01 h3",0, TextLocationEnum.OWNER, "",
                 "ul.u-newsList02 li", "a[href]", 0, TextLocationEnum.ATTR,"href",
-                "a[href]",0,TextLocationEnum.OWNER, "");
-        childDocumentRuleMap.put("中国商务部",childDocumentRule);
+                "a[href]",0,TextLocationEnum.OWNER, "")
+        );
         documentProcessorMap.put("深圳工信局", new ProcessorForGov_szgxj());
         netIsActiveNodeMap.put("深圳工信局", 0);
         documentProcessorMap.put("深圳市政府", new ProcessorForGov_szszf());
@@ -78,12 +79,18 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("广东经信委", 0);
         documentProcessorMap.put("江西工信厅", new ProcessorForGov_jxgxt());
         netIsActiveNodeMap.put("江西工信厅", 1);
-        documentProcessorMap.put("全球技术地图-信息", new ProcessorForGov_qqjsdt());
-        netIsActiveNodeMap.put("全球技术地图-信息", 0);
-        documentProcessorMap.put("全球技术地图-航空", new ProcessorForGov_qqjsdt());
+        documentProcessorMap.put("全球技术地图", new ProcessorForGov_qqjsdt());
+        netIsActiveNodeMap.put("全球技术地图", 0);
+        hasChildNetSiteMap.put("全球技术地图",1);
+        childDocumentRuleMap.put("全球技术地图",
+                new ChildDocumentRule("div.wrap","",0, TextLocationEnum.OWNER, "",
+                        "ul li", "a[href]", 0, TextLocationEnum.ATTR,"href",
+                        "a[href]",0,TextLocationEnum.OWNER, "")
+        );
+        /*documentProcessorMap.put("全球技术地图-航空", new ProcessorForGov_qqjsdt());
         netIsActiveNodeMap.put("全球技术地图-航空", 0);
         documentProcessorMap.put("全球技术地图-航天", new ProcessorForGov_qqjsdt());
-        netIsActiveNodeMap.put("全球技术地图-航天", 0);
+        netIsActiveNodeMap.put("全球技术地图-航天", 0);*/
         documentProcessorMap.put("福建工信厅", new ProcessorForGov_fjgxt());
         netIsActiveNodeMap.put("福建工信厅", 0);
         documentProcessorMap.put("河北经信厅", new ProcessorForGov_hbjxt());
