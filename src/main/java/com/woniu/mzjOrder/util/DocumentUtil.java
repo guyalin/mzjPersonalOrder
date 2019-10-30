@@ -29,6 +29,22 @@ public class DocumentUtil {
         return text;
     }
 
+    public static TextLocationEnum strToEnum(String locationStr){
+        TextLocationEnum textLocationEnum;
+        if ("ATTR".equals(locationStr)) {
+            textLocationEnum = TextLocationEnum.ATTR;
+        } else if ("OWNER".equals(locationStr)) {
+            textLocationEnum = TextLocationEnum.OWNER;
+        } else if ("UPPER".equals(locationStr)) {
+            textLocationEnum = TextLocationEnum.UPPER;
+        } else if ("DATA".equals(locationStr)) {
+            textLocationEnum = TextLocationEnum.DATA;
+        } else
+            textLocationEnum = null;
+
+        return textLocationEnum;
+    }
+
     /**
      * 在字符串数据文本中提取指定字符串
      */

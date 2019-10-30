@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.woniu.mzjOrder.dao.NetInformationDao">
 
-
     <insert id="saveArticleRecords" parameterType="list">
         insert ignore into t_net_article (
             root_url,connect_url,title,target_url,article_name,article_title,area,date_time
@@ -20,7 +19,10 @@
         from t_net_article
         where 1 = 1
         <if test="paramVo != null and paramVo.area != null">
-            AND area like #{paramVo.area}
+            AND area like CONCAT('%',#{paramVo.area},'%')
+        </if>
+        <if test="paramVo != null and paramVo.netName != null">
+            AND article_name like CONCAT('%',#{paramVo.netName},'%')
         </if>
         <if test="paramVo != null and paramVo.latestDays != null">
             <![CDATA[AND date_time >= date_sub(CURRENT_DATE(), interval #{paramVo.latestDays} day)]]>
@@ -32,15 +34,49 @@
             </foreach>
         </if>
         <if test="paramVo.descType != null and paramVo.descType == 1">
-            order by article_name, date_time desc
+            order by article_name asc, date_time desc
         </if>
         <if test="paramVo.descType != null and paramVo.descType == 0">
-            order by date_time desc, article_name
+            order by date_time desc, article_name asc
         </if>
     </select>
     <select id="queryNetUrlEntity" resultType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
-        select name, area, root_url as rootUrl, connect_url as connectUrl, target_url_pattern as targetUrlPattern
-        from t_net_url
-        where active = 1;
+        select url.name,
+               url.area,
+               url.root_url as rootUrl,
+               url.connect_url as connectUrl,
+               url.target_url_pattern as targetUrlPattern,
+               cf.child_filter_id as "NetChildFilter.childFilterId",
+               cf.root_tag as "NetChildFilter.rootTag",
+               cf.record_tag as "NetChildFilter.recordTag",
+               cf.url_tag as "NetChildFilter.urlTag",
+               cf.url_tag_index as "NetChildFilter.urlTagIndex",
+               cf.url_location as "NetChildFilter.urlLocation",
+               cf.url_attr_name as "NetChildFilter.urlAttrName",
+               cf.name_tag as "NetChildFilter.nameTag",
+               cf.name_tag_index as "NetChildFilter.nameTagIndex",
+               cf.name_location as "NetChildFilter.nameLocation",
+               cf.name_attr_name as "NetChildFilter.nameAttrName",
+               rf.filter_id as "ArticleRecordFilter.filterId",
+               rf.if_active_async as "ArticleRecordFilter.ifActiveAsync",
+               rf.if_exclude_cdata as "ArticleRecordFilter.ifExcludeCdata",
+               rf.root_tag as "ArticleRecordFilter.rootTag",
+               rf.record_body_tag as "ArticleRecordFilter.recordBodyTag",
+               rf.title_tag as "ArticleRecordFilter.titleTag",
+               rf.title_tag_index as "ArticleRecordFilter.titleTagIndex",
+               rf.is_owner_text as "ArticleRecordFilter.isOwnerText",
+               rf.is_attr as "ArticleRecordFilter.isAttr",
+               rf.attr_name as "ArticleRecordFilter.attrName",
+               rf.date_tag as "ArticleRecordFilter.dateTag",
+               rf.date_tag_index as "ArticleRecordFilter.dateTagIndex",
+               rf.date_tag_location as "ArticleRecordFilter.dateTagLocation",
+               rf.date_filter_str as "ArticleRecordFilter.dateFilterStr",
+               rf.url_tag as "ArticleRecordFilter.urlTag"
+        from t_net_url url,
+             t_net_url_filter_rule fr
+        left join t_net_url_childfilter cf on fr.child_filter_id = cf.child_filter_id
+        left join t_net_record_filter rf on fr.record_filter_id = rf.filter_id
+        where url.active = 1
+        and url.name = fr.url_name
     </select>
 </mapper>

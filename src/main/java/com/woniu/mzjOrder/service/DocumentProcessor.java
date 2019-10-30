@@ -1,6 +1,7 @@
 package com.woniu.mzjOrder.service;
 
 import com.woniu.mzjOrder.entity.ArticleRecord;
+import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.util.DateUtil;
 import com.woniu.mzjOrder.util.DocumentUtil;
@@ -23,50 +24,6 @@ public interface DocumentProcessor {
         Document docPart = Jsoup.parseBodyFragment(dataStr);
         Elements es = docPart.select(recordTag);
         return es;
-    }
-
-
-    default List<ArticleRecord> elementsAnalysisType1(Elements es, Document document,
-                                                      UrlMonitorEntity urlMonitorEntity, NodeRule nodeRule) {
-        List<ArticleRecord> articleRecords = new ArrayList<>();
-
-        for (Element e : es) {
-            ArticleRecord record = new ArticleRecord();
-            Element link = e.select(nodeRule.getUrlTag()).first();
-            String linkStr = link.attr("href").replaceFirst("\\.\\./", "/");
-            linkStr = linkStr.replaceAll("\\.\\./", "");
-            linkStr = linkStr.replaceAll("\\./", "/");
-            if (!linkStr.startsWith("http:") && !linkStr.startsWith("https:")) {
-                linkStr = urlMonitorEntity.getRootUrl().concat(linkStr);
-            }
-            record.setArea(urlMonitorEntity.getArea());
-            record.setArticleName(urlMonitorEntity.getName());
-            record.setRootUrl(urlMonitorEntity.getRootUrl());
-            record.setConnectUrl(document.baseUri());
-            record.setUrlTitle(document.title());
-            String date;
-            if (nodeRule.isOwnDateText()) {
-                if (nodeRule.getRecordTag().equals(""))
-                    date = e.ownText();
-                else
-                    date = e.select(nodeRule.getRecordTag()).get(nodeRule.getDateTagIndex()).ownText();
-            } else {
-                //date = e.select(nodeRule.getDateTag()).first().text();
-                Elements ee = e.select(nodeRule.getDateTag());
-                date = ee.get(nodeRule.getDateTagIndex()).text();
-            }
-            Date dateTime = DateUtil.StringToDate(date);
-            record.setDateTime(dateTime);
-            record.setTargetUrl(linkStr);
-            if (nodeRule.getTitleFlag() == 1) {
-                record.setArticleTitle(link.attr("title"));
-            } else if (nodeRule.getTitleFlag() == 2) {
-                record.setArticleTitle(link.ownText());
-            }
-            articleRecords.add(record);
-        }
-        return articleRecords;
-
     }
 
     default List<ArticleRecord> elementsAnalysisType2(Elements es, Document document,
@@ -94,25 +51,9 @@ public interface DocumentProcessor {
 
                 DateRule dateRule = nodeRule.getDateRule();
                 String date = DocumentUtil.getLocationText(sourceRecord, dateRule.getLocation(), dateRule.getDateTag(), dateRule.getDateTagIndex(), dateRule.getFilterStr());
-                /*switch (dateRule.getLocation()) {
-                    case OWNER: date = sourceRecord.select(dateRule.getDateTag()).get(dateRule.getDateTagIndex()).ownText();
-                        break;
-                    case ATTR: date = sourceRecord.select(dateRule.getDateTag()).
-                            get(dateRule.getDateTagIndex()).
-                            attr(dateRule.getFilterStr());
-                        break;
-                    case UPPER: date = sourceRecord.ownText();
-                        break;
-                    case DATA:
-                        String sourceDateText = sourceRecord.select(dateRule.getDateTag()).
-                                get(dateRule.getDateTagIndex()).data();
-                        date = DateUtil.extractDataStr(sourceDateText, dateRule.getFilterStr());
-                        break;
-                    default: date = null;
-                        break;
-                }*/
                 Date dateTime = DateUtil.StringToDate(date);
-                record.setDateTime(dateTime);
+                String dateStr = DateUtil.DateToString(dateTime);
+                record.setDateTime(dateStr);
                 record.setTargetUrl(linkStr);
                 TitleRule titleRule = nodeRule.getTitleRule();
                 String title;
@@ -138,5 +79,39 @@ public interface DocumentProcessor {
     }
 
     List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity);
+
+    default List<ArticleRecord> explainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
+        List<ArticleRecord> articleRecords;
+        ArticleRecordFilter filter = urlMonitorEntity.getArticleRecordFilter();
+        Integer ifExcludeCdata = filter.getIfExcludeCdata();
+        Elements es;
+        if (ifExcludeCdata == 1) {
+            es = baseCDataTypeAnalysis(document, filter.getRootTag(), filter.getRecordBodyTag());
+        } else{
+            Element root = document.select(filter.getRootTag()).first();
+            es = root.select(filter.getRecordBodyTag());
+        }
+
+        String titleTag = filter.getTitleTag();
+        Integer titleTagIndex = filter.getTitleTagIndex();
+        Boolean isOwnerText = filter.getIsOwnerText() == 1;
+        Boolean isAttr = filter.getIsAttr() == 1;
+        String attrName = filter.getAttrName();
+
+        String dateTag = filter.getDateTag();
+        Integer dateTagIndex = filter.getDateTagIndex();
+        TextLocationEnum locationEnum = DocumentUtil.strToEnum(filter.getDateTagLocation());
+
+        String filterStr = filter.getDateFilterStr();
+
+        String urlTag = filter.getUrlTag();
+
+        TitleRule titleRule = new TitleRule(titleTag, titleTagIndex, isOwnerText, isAttr, attrName);
+        DateRule dateRule = new DateRule(dateTag, dateTagIndex, locationEnum, filterStr);
+        NodeRule nodeRule = new NodeRule(urlTag, titleRule, dateRule);
+        articleRecords = elementsAnalysisType2(es, document, urlMonitorEntity, nodeRule);
+
+        return articleRecords;
+    }
 
 }

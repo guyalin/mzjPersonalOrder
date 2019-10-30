@@ -5,11 +5,14 @@ import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import org.jsoup.nodes.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessorForGovCommon implements DocumentProcessor {
+public class ProcessorForGov_Common implements DocumentProcessor {
     @Override
     public List<ArticleRecord> findAndExplainToArticleRecord(Document document, UrlMonitorEntity urlMonitorEntity) {
-        return null;
+        List<ArticleRecord> articleRecords = new ArrayList<>();
+        articleRecords = explainToArticleRecord(document, urlMonitorEntity);
+        return articleRecords;
     }
 }

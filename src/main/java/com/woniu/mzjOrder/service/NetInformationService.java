@@ -1,11 +1,11 @@
 package com.woniu.mzjOrder.service;
 
+import com.woniu.mzjOrder.entity.ArticleRecord;
+import com.woniu.mzjOrder.entity.ArticleRecordFilter;
+import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
-import com.woniu.mzjOrder.util.DateUtil;
 import com.woniu.mzjOrder.util.DocumentUtil;
-import com.woniu.mzjOrder.vo.ChildDocumentRule;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
-import com.woniu.mzjOrder.vo.NodeRule;
 import com.woniu.mzjOrder.vo.TextLocationEnum;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,25 +20,33 @@ public interface NetInformationService {
 
     void loadNetNewsArticleToDB() throws IOException;
 
-    void queryNetNewsArticleToFile(NetInfoQueryParamVo infoQueryParamVo) throws FileNotFoundException;
+    List<ArticleRecord> queryNetNewsArticle(NetInfoQueryParamVo infoQueryParamVo);
 
-    default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, ChildDocumentRule childDocumentRule, String parentName, String parentArea){
+    void saveToLocalFile() throws FileNotFoundException;
+
+    List<UrlMonitorEntity> queryUrlEntities();
+
+    default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, UrlMonitorEntity parentUrlEntity){
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();
+        NetChildFilter childDocumentRule = parentUrlEntity.getNetChildFilter();
+        ArticleRecordFilter articleRecordFilter = parentUrlEntity.getArticleRecordFilter();
+        String parentName = parentUrlEntity.getName();
+        String parentArea = parentUrlEntity.getArea();
 
         String childRootTag = childDocumentRule.getRootTag();
-        String rootAreaTag = childDocumentRule.getRootAreaTag();
+        /*String rootAreaTag = childDocumentRule.getRootAreaTag();
         Integer rootAreaTagIndex = childDocumentRule.getRootAreaTagIndex();
         TextLocationEnum areaLocation = childDocumentRule.getAreaLocation();
-        String areaAttrName = childDocumentRule.getAreaAttrName();
+        String areaAttrName = childDocumentRule.getAreaAttrName();*/
         String recordTag = childDocumentRule.getRecordTag();
-        String childRootUrlTag = childDocumentRule.getChildRootUrlTag();
-        Integer childRootUrlTagIndex = childDocumentRule.getChildRootUrlTagIndex();
-        TextLocationEnum childRootUrlLocation = childDocumentRule.getChildRootUrlLocation();
+        String childRootUrlTag = childDocumentRule.getUrlTag();
+        Integer childRootUrlTagIndex = childDocumentRule.getUrlTagIndex();
+        TextLocationEnum childRootUrlLocation = DocumentUtil.strToEnum(childDocumentRule.getUrlLocation());
         String urlAttrName = childDocumentRule.getUrlAttrName();
-        String childNameTag = childDocumentRule.getChildNameTag();
-        Integer childNameTagIndex = childDocumentRule.getChildNameTagIndex();
-        TextLocationEnum nameLocation = childDocumentRule.getNameLocation();
-        String nameAttr = childDocumentRule.getNameAttr();
+        String childNameTag = childDocumentRule.getNameTag();
+        Integer childNameTagIndex = childDocumentRule.getNameTagIndex();
+        TextLocationEnum nameLocation = DocumentUtil.strToEnum(childDocumentRule.getNameLocation());
+        String nameAttr = childDocumentRule.getNameAttrName();
 
         Element rootE = rootDocument.select(childRootTag).first();
         //String entityArea = rootE.select(rootAreaTag).first().ownText(); //所有子地区的所属公共地区名
@@ -50,6 +58,7 @@ public interface NetInformationService {
             String childName = parentName.concat("-").concat(DocumentUtil.getLocationText(childRecord, nameLocation, childNameTag, childNameTagIndex, nameAttr));
             String childRootUrl = DocumentUtil.getLocationText(childRecord, childRootUrlLocation, childRootUrlTag, childRootUrlTagIndex, urlAttrName);
             UrlMonitorEntity urlMonitorEntity = new UrlMonitorEntity(entityArea, childName, childRootUrl, childRootUrl,"");
+            urlMonitorEntity.setArticleRecordFilter(articleRecordFilter);
             monitorEntities.add(urlMonitorEntity);
         }
 

@@ -65,7 +65,7 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("中国商务部", 0);
         hasChildNetSiteMap.put("中国商务部",1);
         childDocumentRuleMap.put("中国商务部",
-                new ChildDocumentRule("section.f-mt20","header.listTitle_01 h3",0, TextLocationEnum.OWNER, "",
+                new ChildDocumentRule("section.f-mt20","",0, TextLocationEnum.OWNER, "",
                 "ul.u-newsList02 li", "a[href]", 0, TextLocationEnum.ATTR,"href",
                 "a[href]",0,TextLocationEnum.OWNER, "")
         );

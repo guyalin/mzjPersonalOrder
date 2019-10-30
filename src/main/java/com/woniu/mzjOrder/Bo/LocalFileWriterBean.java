@@ -32,7 +32,7 @@ public class LocalFileWriterBean {
             pw.println("department: "+ record.getArticleName());
             pw.println("link : " + record.getTargetUrl());
             pw.println("text : " + record.getArticleTitle());
-            pw.println("date : " + DateUtil.DateToString(record.getDateTime()));
+            pw.println("date : " + record.getDateTime());
             pw.println("\n");
         }
         pw.flush();

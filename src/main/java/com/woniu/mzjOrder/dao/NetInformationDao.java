@@ -16,4 +16,6 @@ public interface NetInformationDao {
     List<ArticleRecord> queryArticleRecordsByParams(@Param("paramVo") NetInfoQueryParamVo paramVo);
 
     List<UrlMonitorEntity> queryNetUrlEntity();
+
+
 }

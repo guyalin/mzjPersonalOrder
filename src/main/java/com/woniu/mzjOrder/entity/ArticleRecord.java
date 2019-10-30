@@ -17,5 +17,5 @@ public class ArticleRecord implements Serializable {
     private String targetUrl;
     private String articleName;
     private String articleTitle;
-    private Date dateTime;
+    private String dateTime;
 }
