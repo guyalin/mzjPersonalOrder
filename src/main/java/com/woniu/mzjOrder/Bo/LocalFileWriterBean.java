@@ -16,7 +16,7 @@ public class LocalFileWriterBean {
     private String localFilePath;
     private PrintWriter pw;
 
-    public void init() throws FileNotFoundException {
+    private void init() throws FileNotFoundException {
         if (pw == null) {
             log.info("LocalFileWriterBean: printWriter init!");
             pw = new PrintWriter(new File(localFilePath +"\\" + "result" + ".txt"));

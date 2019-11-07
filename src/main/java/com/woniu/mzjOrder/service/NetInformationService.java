@@ -1,5 +1,6 @@
 package com.woniu.mzjOrder.service;
 
+import com.woniu.mzjOrder.controller.WebSocketServer;
 import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.NetChildFilter;
@@ -25,6 +26,8 @@ public interface NetInformationService {
     void saveToLocalFile() throws FileNotFoundException;
 
     List<UrlMonitorEntity> queryUrlEntities();
+
+    void sendWebSocketMessage(WebSocketServer socketServer, Object message);
 
     default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, UrlMonitorEntity parentUrlEntity){
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();

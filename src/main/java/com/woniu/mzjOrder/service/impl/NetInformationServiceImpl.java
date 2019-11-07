@@ -3,6 +3,7 @@ package com.woniu.mzjOrder.service.impl;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
+import com.woniu.mzjOrder.controller.WebSocketServer;
 import com.woniu.mzjOrder.dao.NetInformationDao;
 import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.ArticleRecordFilter;
@@ -15,6 +16,7 @@ import com.woniu.mzjOrder.vo.ChildDocumentRule;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +38,12 @@ public class NetInformationServiceImpl implements NetInformationService {
     private NetInformationDao informationDao;
     @Autowired
     private WebClient webClient;
+    /*@Autowired
+    private WebSocketServer webSocketServer; //为什么是新的实例。*/
 
     private List<ArticleRecord> recordListForOneQuery = new ArrayList<>();
+
+    private List<UrlMonitorEntity> recordListForOneQueryFailed;
     /**
      * 监控特定网页固定栏目的新闻动态。定时持久化到数据库
      * 用Jsoup实现
@@ -46,16 +52,24 @@ public class NetInformationServiceImpl implements NetInformationService {
     public void loadNetNewsArticleToDB() {
         List<ArticleRecord> articleList;
         List<UrlMonitorEntity> urlEntities =  informationDao.queryNetUrlEntity();
-
-        Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
+        recordListForOneQueryFailed = new ArrayList<>();
+        /*Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
         Map<String, Integer> netIsActiveNodeMap = infoRuleMapBean.getNetIsActiveNodeMap();
         Map<String, Integer> hasChildNetSiteMap = infoRuleMapBean.getHasChildNetSiteMap();
-        Map<String, ChildDocumentRule> childDocumentRuleMap = infoRuleMapBean.getChildDocumentRuleMap();
+        Map<String, ChildDocumentRule> childDocumentRuleMap = infoRuleMapBean.getChildDocumentRuleMap();*/
 
         //articleList = getNewsArticle(urlEntities, netIsActiveNodeMap, hasChildNetSiteMap, childDocumentRuleMap);
         articleList = getNewsArticle(urlEntities, new ProcessorForGov_Common());
-
         saveToDB(articleList);
+        //推送更新异常的网站信息
+        if (recordListForOneQueryFailed.size() >0 ){
+            //String message = recordListForOneQueryFailed.toString();
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("failedUrls", recordListForOneQueryFailed);
+            for (WebSocketServer server : WebSocketServer.webSocketSet.values()) {
+                sendWebSocketMessage(server, jsonObject);
+            }
+        }
     }
 
     private List<ArticleRecord> getNewsArticle(List<UrlMonitorEntity> UrlEntities,
@@ -103,6 +117,7 @@ public class NetInformationServiceImpl implements NetInformationService {
                 }
             } catch (Exception e) {
                 log.error("{}网址解析异常:{}", urlEntity.getName(), e.toString());
+                recordListForOneQueryFailed.add(urlEntity);
                 continue;
             }
         }
@@ -138,6 +153,10 @@ public class NetInformationServiceImpl implements NetInformationService {
     public List<UrlMonitorEntity> queryUrlEntities(){
         List<UrlMonitorEntity> urlEntities =  informationDao.queryNetUrlEntity();
         return urlEntities;
+    }
+
+    public void sendWebSocketMessage(WebSocketServer socketServer, Object message){
+        socketServer.sendMessage(message);
     }
 
 }

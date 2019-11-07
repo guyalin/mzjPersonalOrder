@@ -11,6 +11,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,18 +39,23 @@ public interface DocumentProcessor {
                 if (link == null) {
                     continue;
                 }
-                String linkStr = link.attr("href").replaceFirst("\\.\\./", "/");
+
+                /*String linkStr = link.attr("href").replaceFirst("\\.\\./", "/");
                 linkStr = linkStr.replaceAll("\\.\\./", "");
                 linkStr = linkStr.replaceAll("\\./", "/");
                 if (!linkStr.startsWith("http:") && !linkStr.startsWith("https:")) {
                     linkStr = urlMonitorEntity.getRootUrl().concat(linkStr);
-                }
+                }*/
+                String linkStrUrl = link.attr("href");
+                URI baseUrl = new URI(document.baseUri());
+                URI relative = new URI(linkStrUrl);
+                URI linkStrURI = baseUrl.resolve(relative);
+                String linkStr = linkStrURI.toString();
                 record.setArea(urlMonitorEntity.getArea());
                 record.setArticleName(urlMonitorEntity.getName());
                 record.setRootUrl(urlMonitorEntity.getRootUrl());
                 record.setConnectUrl(urlMonitorEntity.getConnectUrl());
                 record.setUrlTitle(document.title());
-
                 DateRule dateRule = nodeRule.getDateRule();
                 String date = DocumentUtil.getLocationText(sourceRecord, dateRule.getLocation(), dateRule.getDateTag(), dateRule.getDateTagIndex(), dateRule.getFilterStr());
                 Date dateTime = DateUtil.StringToDate(date);

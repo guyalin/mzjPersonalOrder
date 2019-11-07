@@ -36,6 +36,11 @@ public class NetInformationController {
         }
     }
 
+    /**
+     * 本地调试用，后期废弃
+     * @param queryParamVo
+     * @return
+     */
     @PostMapping(value = "/important/article/download")
     public JsonResult queryNetInfoArticleToLocalFile(@RequestBody NetInfoQueryParamVo queryParamVo){
         JsonResult jsonResult = new JsonResult();
@@ -85,9 +90,7 @@ public class NetInformationController {
             jsonResult.setData("message:"+ e.toString());
             return jsonResult;
         }
-
     }
-
 
     @GetMapping(value = "/important/article/netUrl")
     public JsonResult queryActiveNetEntities(){

@@ -13,19 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class NetInfoRuleBeanConfig{
+public class NetInfoRuleBeanConfig {
 
     /**
      * 初始化所有网页及规则
+     *
      * @return
      */
     @Bean
-    public NetInfoRuleMapBean netInfoRuleListBean(){
+    public NetInfoRuleMapBean netInfoRuleListBean() {
         NetInfoRuleMapBean infoRuleMapBean = new NetInfoRuleMapBean();
         Map<String, DocumentProcessor> documentProcessorMap = new HashMap<>();
         Map<String, Integer> netIsActiveNodeMap = new HashMap<>();
@@ -63,11 +63,11 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("中国发改部", 0);
         documentProcessorMap.put("中国商务部", new ProcessorForGov_zgswb());
         netIsActiveNodeMap.put("中国商务部", 0);
-        hasChildNetSiteMap.put("中国商务部",1);
+        hasChildNetSiteMap.put("中国商务部", 1);
         childDocumentRuleMap.put("中国商务部",
-                new ChildDocumentRule("section.f-mt20","",0, TextLocationEnum.OWNER, "",
-                "ul.u-newsList02 li", "a[href]", 0, TextLocationEnum.ATTR,"href",
-                "a[href]",0,TextLocationEnum.OWNER, "")
+                new ChildDocumentRule("section.f-mt20", "", 0, TextLocationEnum.OWNER, "",
+                        "ul.u-newsList02 li", "a[href]", 0, TextLocationEnum.ATTR, "href",
+                        "a[href]", 0, TextLocationEnum.OWNER, "")
         );
         documentProcessorMap.put("深圳工信局", new ProcessorForGov_szgxj());
         netIsActiveNodeMap.put("深圳工信局", 0);
@@ -81,11 +81,11 @@ public class NetInfoRuleBeanConfig{
         netIsActiveNodeMap.put("江西工信厅", 1);
         documentProcessorMap.put("全球技术地图", new ProcessorForGov_qqjsdt());
         netIsActiveNodeMap.put("全球技术地图", 0);
-        hasChildNetSiteMap.put("全球技术地图",1);
+        hasChildNetSiteMap.put("全球技术地图", 1);
         childDocumentRuleMap.put("全球技术地图",
-                new ChildDocumentRule("div.wrap","",0, TextLocationEnum.OWNER, "",
-                        "ul li", "a[href]", 0, TextLocationEnum.ATTR,"href",
-                        "a[href]",0,TextLocationEnum.OWNER, "")
+                new ChildDocumentRule("div.wrap", "", 0, TextLocationEnum.OWNER, "",
+                        "ul li", "a[href]", 0, TextLocationEnum.ATTR, "href",
+                        "a[href]", 0, TextLocationEnum.OWNER, "")
         );
         /*documentProcessorMap.put("全球技术地图-航空", new ProcessorForGov_qqjsdt());
         netIsActiveNodeMap.put("全球技术地图-航空", 0);
@@ -105,23 +105,17 @@ public class NetInfoRuleBeanConfig{
     }
 
     /**
-     *  写入本地文件器
+     * 写入本地文件器
      */
-    @Bean(destroyMethod="destroy")
-    public LocalFileWriterBean localFileWriterBean(@Value("${local.net-file.root-path}") String path){
+    @Bean(destroyMethod = "destroy")
+    public LocalFileWriterBean localFileWriterBean(@Value("${local.net-file.root-path}") String path) {
         LocalFileWriterBean localFileWriterBean = new LocalFileWriterBean();
-        try {
-            localFileWriterBean.setLocalFilePath(path);
-            localFileWriterBean.init();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+        localFileWriterBean.setLocalFilePath(path);
         return localFileWriterBean;
     }
 
     @Bean(name = "webClient")
-    public WebClient getWebClient(){
+    public WebClient getWebClient() {
         WebClient webClient = new WebClient(BrowserVersion.CHROME);//新建一个模拟谷歌Chrome浏览器的浏览器客户端对象
         webClient.getOptions().setThrowExceptionOnScriptError(false);//当JS执行出错的时候是否抛出异常, 这里选择不需要
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);//当HTTP的状态非200时是否抛出异常, 这里选择不需要

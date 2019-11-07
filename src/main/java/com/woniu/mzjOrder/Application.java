@@ -1,12 +1,13 @@
 package com.woniu.mzjOrder;
 
-import com.woniu.mzjOrder.visualClient.NetArticleMonitor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 @MapperScan("com.woniu.mzjOrder.dao")
 @SpringBootApplication
+@EnableWebSocket
 public class Application {
 
     public static void main(String[] args) {
