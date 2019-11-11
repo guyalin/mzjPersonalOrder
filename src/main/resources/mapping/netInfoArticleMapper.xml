@@ -11,6 +11,58 @@
              #{item.articleTitle},#{item.area},#{item.dateTime})
         </foreach>
     </insert>
+    <insert id="saveUrlEntity" parameterType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
+        insert into t_net_url (area, name, root_url, connect_url)
+        values (#{urlMonitorEntity.area},
+                #{urlMonitorEntity.name},
+                #{urlMonitorEntity.rootUrl},
+                #{urlMonitorEntity.connectUrl})
+    </insert>
+    <insert id="saveNetChildFilter" parameterType="com.woniu.mzjOrder.entity.NetChildFilter">
+        insert into t_net_url_childfilter (child_filter_id, root_tag, record_tag,
+                                           url_tag, url_tag_index, url_location, url_attr_name,
+                                           name_tag, name_tag_index, name_location, name_attr_name)
+        values (#{netChildFilter.childFilterId},
+                #{netChildFilter.rootTag},
+                #{netChildFilter.recordTag},
+                #{netChildFilter.urlTag},
+                #{netChildFilter.urlTagIndex},
+                #{netChildFilter.urlLocation},
+                #{netChildFilter.urlAttrName},
+                #{netChildFilter.nameTag},
+                #{netChildFilter.nameTagIndex},
+                #{netChildFilter.nameLocation},
+                #{netChildFilter.nameAttrName}
+                )
+    </insert>
+    <insert id="saveRecordFilter" parameterType="com.woniu.mzjOrder.entity.ArticleRecordFilter">
+        insert into t_net_record_filter (filter_id, if_active_async, if_exclude_cdata,
+                                         root_tag, record_body_tag,
+                                         title_tag, title_tag_index, is_owner_text, is_attr, attr_name,
+                                         date_tag, date_tag_index, date_tag_location, date_filter_str,
+                                         url_tag)
+        values (#{filter.filterId},
+                #{filter.ifActiveAsync},
+                #{filter.ifExcludeCdata},
+                #{filter.rootTag},
+                #{filter.recordBodyTag},
+                #{filter.titleTag},
+                #{filter.titleTagIndex},
+                #{filter.isOwnerText},
+                #{filter.isAttr},
+                #{filter.attrName},
+                #{filter.dateTag},
+                #{filter.dateTagIndex},
+                #{filter.dateTagLocation},
+                #{filter.ifActiveAsync}
+                )
+    </insert>
+    <insert id="saveUrlRecordRelation" parameterType="Map">
+        insert into t_net_url_filter_rule (url_name, child_filter_id, record_filter_id)
+        values (#{urlName},
+                #{childFilterId},
+                #{recordFilterId})
+    </insert>
 
     <select id="queryArticleRecordsByParams" parameterType="com.woniu.mzjOrder.vo.NetInfoQueryParamVo"
             resultType="com.woniu.mzjOrder.entity.ArticleRecord">

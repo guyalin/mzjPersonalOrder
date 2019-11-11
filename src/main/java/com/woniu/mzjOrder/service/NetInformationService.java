@@ -7,6 +7,7 @@ import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.util.DocumentUtil;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
+import com.woniu.mzjOrder.vo.NetUrlVo;
 import com.woniu.mzjOrder.vo.TextLocationEnum;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,6 +29,10 @@ public interface NetInformationService {
     List<UrlMonitorEntity> queryUrlEntities();
 
     void sendWebSocketMessage(WebSocketServer socketServer, Object message);
+
+    void saveNetUrl(NetUrlVo netUrlVo);
+
+    List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity);
 
     default List<UrlMonitorEntity> getChildMonitorEntity(Document rootDocument, UrlMonitorEntity parentUrlEntity){
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();

@@ -12,15 +12,17 @@ import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
-import com.woniu.mzjOrder.vo.ChildDocumentRule;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
+import com.woniu.mzjOrder.vo.NetUrlVo;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.io.*;
 import java.util.*;
@@ -155,8 +157,32 @@ public class NetInformationServiceImpl implements NetInformationService {
         return urlEntities;
     }
 
+    @Override
     public void sendWebSocketMessage(WebSocketServer socketServer, Object message){
         socketServer.sendMessage(message);
+    }
+
+    @Override
+    @Transactional
+    public void saveNetUrl(NetUrlVo netUrlVo) {
+        UrlMonitorEntity urlMonitorEntity = netUrlVo.getUrlMonitorEntity();
+        NetChildFilter childFilter = netUrlVo.getNetChildFilter();
+        ArticleRecordFilter recordFilter = netUrlVo.getArticleRecordFilter();
+        Assert.notNull(urlMonitorEntity, "网页实体不能为空！");
+        Assert.notNull(recordFilter, "列表过滤规则不能为空！");
+        //保存添加的网站，子页面过滤规则以及列表记录筛选规则
+        informationDao.saveUrlEntity(urlMonitorEntity);
+        informationDao.saveNetChildFilter(childFilter);
+        informationDao.saveRecordFilter(recordFilter);
+    }
+
+    @Override
+    public List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity){
+        List<ArticleRecord> records;
+        List<UrlMonitorEntity> monitorEntities = new ArrayList<>();
+        monitorEntities.add(urlMonitorEntity);
+        records = getNewsArticle(monitorEntities, new ProcessorForGov_Common());
+        return records;
     }
 
 }
