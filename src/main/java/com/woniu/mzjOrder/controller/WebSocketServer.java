@@ -43,6 +43,7 @@ public class WebSocketServer {
         webSocketSet.put(sid, this);     //加入set中
         addOnlineCount();           //在线数加1
         log.info("有新窗口开始监听:{},sessionId为{},当前在线人数为{}", sid, session.getId(), getOnlineCount());
+        log.info("当前在线实例名：{}", webSocketSet.keySet().toArray());
         this.sid = sid;
         //sendMessage("连接成功");
     }
@@ -52,7 +53,7 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
-        webSocketSet.remove(this);  //从set中删除
+        webSocketSet.remove(sid);  //从set中删除
         subOnlineCount();           //在线数减1
         log.info("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
@@ -68,12 +69,12 @@ public class WebSocketServer {
                 e.printStackTrace();
             }
         }*/
-        this.sendMessage("没人在家，请勿打扰");
+        this.sendMessage("来自"+session+"的消息");
     }
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("{}发生错误", session.getId());
+        log.error("sid: {}发生错误,sessionId:{}", sid,session.getId());
         error.printStackTrace();
     }
 
