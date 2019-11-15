@@ -6,6 +6,7 @@ import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import org.apache.ibatis.annotations.Param;
+import org.omg.CORBA.INTERNAL;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,11 +21,20 @@ public interface NetInformationDao {
 
     List<UrlMonitorEntity> queryNetUrlEntity();
 
+
+    Integer queryUrlEntity(String urlId);
+
     void saveUrlEntity(UrlMonitorEntity urlMonitorEntity);
+
+    Integer queryChildFilter(String childFilterId);
 
     void saveNetChildFilter(NetChildFilter netChildFilter);
 
+    Integer queryArticleRecordFilter(String recordFilterId);
+
     void saveRecordFilter(ArticleRecordFilter filter);
+
+    Integer queryUrlRecordRelation(String name);
 
     void saveUrlRecordRelation(Map<String, String> paramMap);
 }

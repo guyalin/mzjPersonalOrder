@@ -131,4 +131,24 @@
         where url.active = 1
         and url.name = fr.url_name
     </select>
+    <select id="queryUrlEntity" resultType="java.lang.Integer">
+        select count(1) as cnt
+        from t_net_url
+        where name = #{urlId}
+    </select>
+    <select id="queryChildFilter" resultType="java.lang.Integer">
+        select count(1) as cnt
+        from t_net_url_childfilter
+        where child_filter_id = #{childFilterId}
+    </select>
+    <select id="queryArticleRecordFilter" resultType="java.lang.Integer">
+        select count(1) as cnt
+        from t_net_record_filter
+        where filter_id = #{recordFilterId}
+    </select>
+    <select id="queryUrlRecordRelation" resultType="java.lang.Integer">
+        select count(1) as cnt
+        from t_net_url_filter_rule
+        where url_name = #{name}
+    </select>
 </mapper>

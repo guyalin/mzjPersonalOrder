@@ -9,14 +9,17 @@ import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
+import com.woniu.mzjOrder.exception.CustomException;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
 import com.woniu.mzjOrder.vo.NetUrlVo;
+import com.woniu.mzjOrder.vo.ResultStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
+import org.eclipse.jetty.util.StringUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,7 @@ public class NetInformationServiceImpl implements NetInformationService {
     private List<ArticleRecord> recordListForOneQuery = new ArrayList<>();
 
     private List<UrlMonitorEntity> recordListForOneQueryFailed;
+
     /**
      * 监控特定网页固定栏目的新闻动态。定时持久化到数据库
      * 用Jsoup实现
@@ -53,7 +57,7 @@ public class NetInformationServiceImpl implements NetInformationService {
     @Override
     public void loadNetNewsArticleToDB() {
         List<ArticleRecord> articleList;
-        List<UrlMonitorEntity> urlEntities =  informationDao.queryNetUrlEntity();
+        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity();
         recordListForOneQueryFailed = new ArrayList<>();
         /*Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
         Map<String, Integer> netIsActiveNodeMap = infoRuleMapBean.getNetIsActiveNodeMap();
@@ -64,13 +68,14 @@ public class NetInformationServiceImpl implements NetInformationService {
         articleList = getNewsArticle(urlEntities, new ProcessorForGov_Common());
         saveToDB(articleList);
         //推送更新异常的网站信息
-        if (recordListForOneQueryFailed.size() >0 ){
+        if (recordListForOneQueryFailed.size() > 0) {
             //String message = recordListForOneQueryFailed.toString();
+            /**
+             * 考虑做成自定义异常。通过自定义异常处理，统一推送到客户端
+             */
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("failedUrls", recordListForOneQueryFailed);
-            for (WebSocketServer server : WebSocketServer.webSocketSet.values()) {
-                sendWebSocketMessage(server, jsonObject);
-            }
+            throw new CustomException(ResultStatusEnum.URL_ANALYSIS_ERROR, jsonObject);
         }
     }
 
@@ -80,7 +85,7 @@ public class NetInformationServiceImpl implements NetInformationService {
                                                //Map<String, Integer> netIsActiveNodeMap,
                                                //Map<String, Integer> hasChildNetSiteMap,
                                                //Map<String, ChildDocumentRule> childDocumentRuleMap
-                                               ) {
+    ) {
         List<ArticleRecord> articleList = new ArrayList<>();
         //Map<String, DocumentProcessor> processorMap = new HashMap<>();
 
@@ -100,7 +105,7 @@ public class NetInformationServiceImpl implements NetInformationService {
                     String pageXml = page.asXml();//直接将加载完成的页面转换成xml格式的字符串
                     document = Jsoup.parse(pageXml);//获取html文档
                 } else {
-                    document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(5000).get();
+                    document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(10000).get();
                 }
                 //深度优先加载每个子页面
                 if (hasChildSite != null && hasChildSite == 1) {
@@ -127,16 +132,17 @@ public class NetInformationServiceImpl implements NetInformationService {
     }
 
     private int saveToDB(List<ArticleRecord> records) {
-        try{
+        try {
             informationDao.saveArticleRecords(records);
             return 1;
-        }catch (Exception e){
+        } catch (Exception e) {
             return 0;
         }
     }
 
     /**
      * 根据参数读取数据库中已经持久化的记录
+     *
      * @param queryParamVo
      * @return
      */
@@ -152,32 +158,62 @@ public class NetInformationServiceImpl implements NetInformationService {
     }
 
     @Override
-    public List<UrlMonitorEntity> queryUrlEntities(){
-        List<UrlMonitorEntity> urlEntities =  informationDao.queryNetUrlEntity();
+    public List<UrlMonitorEntity> queryUrlEntities() {
+        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity();
         return urlEntities;
     }
 
     @Override
-    public void sendWebSocketMessage(WebSocketServer socketServer, Object message){
+    public void sendWebSocketMessage(WebSocketServer socketServer, Object message) {
         socketServer.sendMessage(message);
     }
 
     @Override
     @Transactional
-    public void saveNetUrl(NetUrlVo netUrlVo) {
-        UrlMonitorEntity urlMonitorEntity = netUrlVo.getUrlMonitorEntity();
-        NetChildFilter childFilter = netUrlVo.getNetChildFilter();
-        ArticleRecordFilter recordFilter = netUrlVo.getArticleRecordFilter();
-        Assert.notNull(urlMonitorEntity, "网页实体不能为空！");
-        Assert.notNull(recordFilter, "列表过滤规则不能为空！");
+    public void saveNetUrl(UrlMonitorEntity urlMonitorEntity) {
+        //UrlMonitorEntity urlMonitorEntity = netUrlVo.getUrlMonitorEntity();
+        NetChildFilter childFilter = urlMonitorEntity.getNetChildFilter();
+        ArticleRecordFilter recordFilter = urlMonitorEntity.getArticleRecordFilter();
+        //Assert.notNull(urlMonitorEntity, "网页实体不能为空！");
+        if (StringUtil.isNotBlank(urlMonitorEntity.getName())){
+            throw new CustomException(3, "网页实体不能为空");
+        }
+        //Assert.notNull(recordFilter, "列表过滤规则不能为空！");
+        if (recordFilter == null){
+            throw new CustomException(3, "列表过滤规则不能为空");
+        }
         //保存添加的网站，子页面过滤规则以及列表记录筛选规则
+        Integer urlCnt = informationDao.queryUrlEntity(urlMonitorEntity.getName());
+        Integer childFilterCnt = informationDao.queryChildFilter(childFilter.getChildFilterId());
+        Integer recordFilterCnt = informationDao.queryArticleRecordFilter(recordFilter.getFilterId());
+        Integer urlRecordRelationCnt = informationDao.queryUrlRecordRelation(urlMonitorEntity.getName());
+        String res = "";
+        if (urlCnt > 0) {
+            res = "网址已存在！";
+            throw new CustomException(3, res);
+        } else if (childFilterCnt > 0) {
+            res = "子页过滤条件名已存在";
+            throw new CustomException(3, res);
+        } else if (recordFilterCnt > 0) {
+            res = "列表记录筛选规则名已存在";
+            throw new CustomException(3, res);
+        } else if (urlRecordRelationCnt > 0) {
+            res = "已存在相同筛选RULE";
+            throw new CustomException(3, res);
+        }
         informationDao.saveUrlEntity(urlMonitorEntity);
         informationDao.saveNetChildFilter(childFilter);
         informationDao.saveRecordFilter(recordFilter);
+        Map<String, String> relationParam = new HashMap<>();
+        relationParam.put("urlName", urlMonitorEntity.getName());
+        relationParam.put("childFilterId", childFilter.getChildFilterId());
+        relationParam.put("recordFilterId", recordFilter.getFilterId());
+        informationDao.saveUrlRecordRelation(relationParam);
+
     }
 
     @Override
-    public List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity){
+    public List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity) {
         List<ArticleRecord> records;
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();
         monitorEntities.add(urlMonitorEntity);

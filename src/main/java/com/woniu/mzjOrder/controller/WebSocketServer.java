@@ -3,8 +3,6 @@ package com.woniu.mzjOrder.controller;
 import com.woniu.mzjOrder.configuration.ServerEncoder;
 import com.woniu.mzjOrder.service.NetInformationService;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -81,7 +79,7 @@ public class WebSocketServer {
     /**
      * 群发自定义消息
      */
-    public static void sendInfo(String message, @PathParam("sid") String sid) {
+    public static void sendWebSocketMessage(Object message, String sid) {
         log.info("推送消息到窗口" + sid + "，推送内容:" + message);
         for (WebSocketServer item : webSocketSet.values()) {
             //这里可以设定只推送给这个sid的，为null则全部推送

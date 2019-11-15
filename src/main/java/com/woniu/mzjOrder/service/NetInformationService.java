@@ -30,7 +30,7 @@ public interface NetInformationService {
 
     void sendWebSocketMessage(WebSocketServer socketServer, Object message);
 
-    void saveNetUrl(NetUrlVo netUrlVo);
+    void saveNetUrl(UrlMonitorEntity netUrlVo);
 
     List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity);
 

@@ -22,28 +22,29 @@ public class NetInformationController {
     private NetInformationService netInformationService;
 
     @GetMapping(value = "/important/article/persistence")
-    public JsonResult loadNetNewsArticleToDB(){
+    public JsonResult loadNetNewsArticleToDB() {
         JsonResult jsonResult = new JsonResult();
         try {
             netInformationService.loadNetNewsArticleToDB();
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
             jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:"+ e.toString());
+            jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
     }
 
     /**
      * 本地调试用，后期废弃
+     *
      * @param queryParamVo
      * @return
      */
     @PostMapping(value = "/important/article/download")
-    public JsonResult queryNetInfoArticleToLocalFile(@RequestBody NetInfoQueryParamVo queryParamVo){
+    public JsonResult queryNetInfoArticleToLocalFile(@RequestBody NetInfoQueryParamVo queryParamVo) {
         JsonResult jsonResult = new JsonResult();
         try {
             netInformationService.queryNetNewsArticle(queryParamVo);
@@ -51,10 +52,10 @@ public class NetInformationController {
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
             jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:"+ e.toString());
+            jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
     }
@@ -68,33 +69,33 @@ public class NetInformationController {
             jsonResult.setReturnMsg("成功");
             jsonResult.setData(articleRecords);
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
             jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:"+ e.toString());
+            jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
     }
 
 
     @GetMapping(value = "/important/article/monitor")
-    public JsonResult activeMonitorClient(){
+    public JsonResult activeMonitorClient() {
         JsonResult jsonResult = new JsonResult();
         try {
 
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
             jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:"+ e.toString());
+            jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
     }
 
     @GetMapping(value = "/important/article/netUrl")
-    public JsonResult queryActiveNetEntities(){
+    public JsonResult queryActiveNetEntities() {
         JsonResult jsonResult = new JsonResult();
         List<UrlMonitorEntity> urlEntities = new ArrayList<>();
         try {
@@ -103,33 +104,46 @@ public class NetInformationController {
             jsonResult.setReturnMsg("成功");
             jsonResult.setData(urlEntities);
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
             jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:"+ e.toString());
+            jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
 
     }
 
-    @PostMapping(value = "/important/url/netUrl")
-    public JsonResult saveNetUrl(NetUrlVo netUrlVo){
+    @PostMapping(value = "/important/url/save")
+    public JsonResult saveNetUrl(@RequestBody UrlMonitorEntity urlMonitorEntity) {
         JsonResult jsonResult = new JsonResult();
         try {
-            netInformationService.saveNetUrl(netUrlVo);
+            netInformationService.saveNetUrl(urlMonitorEntity);
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
-        }catch (Exception e){
+        } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
-            jsonResult.setReturnMsg("失败");
+            jsonResult.setReturnMsg("失败" + e.toString());
             return jsonResult;
         }
     }
 
-    public JsonResult testNetUrl(){
+    @PostMapping(value = "/important/url/test")
+    public JsonResult testNetUrl(@RequestBody UrlMonitorEntity monitorEntity) {
         JsonResult jsonResult = new JsonResult();
-        return jsonResult;
+        List<ArticleRecord> articleRecords;
+        try {
+            articleRecords = netInformationService.testUrlEntity(monitorEntity);
+            jsonResult.setReturnCode("SUCC");
+            jsonResult.setReturnMsg("成功");
+            jsonResult.setData(articleRecords);
+            return jsonResult;
+        } catch (Exception e) {
+            jsonResult.setReturnCode("FAIL");
+            jsonResult.setReturnMsg("失败" + e.toString());
+            return jsonResult;
+        }
+
     }
 
 
