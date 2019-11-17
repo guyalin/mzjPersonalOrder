@@ -16,7 +16,7 @@ public class GlobalDefaultExceptionHandler {
     @ExceptionHandler(CustomException.class)
     @ResponseBody
     public void defaultExceptionHandler(CustomException e) {
-        e.printStackTrace();
+        //e.printStackTrace();
         log.error("{}--业务异常,错误码：{}, {}", this.getClass(),e.getCode(), e.getMessage());
         if (e.getCode() == 2){
             WebSocketServer.sendWebSocketMessage(e.getJsonObject(), null);

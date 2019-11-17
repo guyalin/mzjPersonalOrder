@@ -6,6 +6,7 @@ import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.util.DocumentUtil;
+import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetUrlVo;
 import com.woniu.mzjOrder.vo.TextLocationEnum;
@@ -30,7 +31,7 @@ public interface NetInformationService {
 
     void sendWebSocketMessage(WebSocketServer socketServer, Object message);
 
-    void saveNetUrl(UrlMonitorEntity netUrlVo);
+    JsonResult saveNetUrl(UrlMonitorEntity netUrlVo, String sid);
 
     List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity);
 

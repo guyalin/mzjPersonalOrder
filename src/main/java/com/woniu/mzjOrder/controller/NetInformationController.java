@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,13 +114,17 @@ public class NetInformationController {
 
     }
 
-    @PostMapping(value = "/important/url/save")
-    public JsonResult saveNetUrl(@RequestBody UrlMonitorEntity urlMonitorEntity) {
+    /**
+     * 保存新增网址及过滤规则
+     *
+     * @param urlMonitorEntity
+     * @return
+     */
+    @PostMapping(value = "/important/url/save/{sid}")
+    public JsonResult saveNetUrl(@RequestBody UrlMonitorEntity urlMonitorEntity, @PathVariable("sid") String sid) {
         JsonResult jsonResult = new JsonResult();
         try {
-            netInformationService.saveNetUrl(urlMonitorEntity);
-            jsonResult.setReturnCode("SUCC");
-            jsonResult.setReturnMsg("成功");
+            jsonResult = netInformationService.saveNetUrl(urlMonitorEntity, sid);
             return jsonResult;
         } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
@@ -128,6 +133,12 @@ public class NetInformationController {
         }
     }
 
+    /**
+     * 测试新增网址
+     *
+     * @param monitorEntity
+     * @return
+     */
     @PostMapping(value = "/important/url/test")
     public JsonResult testNetUrl(@RequestBody UrlMonitorEntity monitorEntity) {
         JsonResult jsonResult = new JsonResult();

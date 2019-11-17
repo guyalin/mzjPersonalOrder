@@ -12,11 +12,12 @@
         </foreach>
     </insert>
     <insert id="saveUrlEntity" parameterType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
-        insert into t_net_url (area, name, root_url, connect_url)
+        insert into t_net_url (area, name, root_url, connect_url, active)
         values (#{urlMonitorEntity.area},
                 #{urlMonitorEntity.name},
                 #{urlMonitorEntity.rootUrl},
-                #{urlMonitorEntity.connectUrl})
+                #{urlMonitorEntity.connectUrl},
+                1)
     </insert>
     <insert id="saveNetChildFilter" parameterType="com.woniu.mzjOrder.entity.NetChildFilter">
         insert into t_net_url_childfilter (child_filter_id, root_tag, record_tag,
@@ -36,10 +37,20 @@
                 )
     </insert>
     <insert id="saveRecordFilter" parameterType="com.woniu.mzjOrder.entity.ArticleRecordFilter">
-        insert into t_net_record_filter (filter_id, if_active_async, if_exclude_cdata,
-                                         root_tag, record_body_tag,
-                                         title_tag, title_tag_index, is_owner_text, is_attr, attr_name,
-                                         date_tag, date_tag_index, date_tag_location, date_filter_str,
+        insert into t_net_record_filter (filter_id,
+                                         if_active_async,
+                                         if_exclude_cdata,
+                                         root_tag,
+                                         record_body_tag,
+                                         title_tag,
+                                         title_tag_index,
+                                         is_owner_text,
+                                         is_attr,
+                                         attr_name,
+                                         date_tag,
+                                         date_tag_index,
+                                         date_tag_location,
+                                         date_filter_str,
                                          url_tag)
         values (#{filter.filterId},
                 #{filter.ifActiveAsync},
@@ -54,7 +65,8 @@
                 #{filter.dateTag},
                 #{filter.dateTagIndex},
                 #{filter.dateTagLocation},
-                #{filter.ifActiveAsync}
+                #{filter.dateFilterStr},
+                #{filter.urlTag}
                 )
     </insert>
     <insert id="saveUrlRecordRelation" parameterType="Map">

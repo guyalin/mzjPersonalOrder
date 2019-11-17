@@ -24,15 +24,15 @@ public interface NetInformationDao {
 
     Integer queryUrlEntity(String urlId);
 
-    void saveUrlEntity(UrlMonitorEntity urlMonitorEntity);
+    void saveUrlEntity(@Param("urlMonitorEntity") UrlMonitorEntity urlMonitorEntity);
 
     Integer queryChildFilter(String childFilterId);
 
-    void saveNetChildFilter(NetChildFilter netChildFilter);
+    void saveNetChildFilter(@Param("netChildFilter") NetChildFilter netChildFilter);
 
     Integer queryArticleRecordFilter(String recordFilterId);
 
-    void saveRecordFilter(ArticleRecordFilter filter);
+    void saveRecordFilter(@Param("filter") ArticleRecordFilter filter);
 
     Integer queryUrlRecordRelation(String name);
 

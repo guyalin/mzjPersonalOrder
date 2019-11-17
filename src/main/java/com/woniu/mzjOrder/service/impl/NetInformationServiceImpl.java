@@ -13,9 +13,9 @@ import com.woniu.mzjOrder.exception.CustomException;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
+import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
-import com.woniu.mzjOrder.vo.NetUrlVo;
 import com.woniu.mzjOrder.vo.ResultStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
@@ -75,7 +75,8 @@ public class NetInformationServiceImpl implements NetInformationService {
              */
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("failedUrls", recordListForOneQueryFailed);
-            throw new CustomException(ResultStatusEnum.URL_ANALYSIS_ERROR, jsonObject);
+            //throw new CustomException(ResultStatusEnum.URL_ANALYSIS_ERROR, jsonObject);
+            WebSocketServer.sendWebSocketMessage(jsonObject, null);
         }
     }
 
@@ -170,46 +171,80 @@ public class NetInformationServiceImpl implements NetInformationService {
 
     @Override
     @Transactional
-    public void saveNetUrl(UrlMonitorEntity urlMonitorEntity) {
+    public JsonResult saveNetUrl(UrlMonitorEntity urlMonitorEntity, String sid) {
+        JsonResult jsonResult = new JsonResult();
         //UrlMonitorEntity urlMonitorEntity = netUrlVo.getUrlMonitorEntity();
         NetChildFilter childFilter = urlMonitorEntity.getNetChildFilter();
         ArticleRecordFilter recordFilter = urlMonitorEntity.getArticleRecordFilter();
         //Assert.notNull(urlMonitorEntity, "网页实体不能为空！");
-        if (StringUtil.isNotBlank(urlMonitorEntity.getName())){
-            throw new CustomException(3, "网页实体不能为空");
+        String res = "";
+        if (urlMonitorEntity == null || StringUtil.isBlank(urlMonitorEntity.getName())){
+            res = "网页实体不能为空";
+            jsonResult.setReturnCode("2");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
         }
         //Assert.notNull(recordFilter, "列表过滤规则不能为空！");
         if (recordFilter == null){
-            throw new CustomException(3, "列表过滤规则不能为空");
+            res = "列表过滤规则不能为空";
+            jsonResult.setReturnCode("2");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
         }
+
         //保存添加的网站，子页面过滤规则以及列表记录筛选规则
         Integer urlCnt = informationDao.queryUrlEntity(urlMonitorEntity.getName());
-        Integer childFilterCnt = informationDao.queryChildFilter(childFilter.getChildFilterId());
+        Integer childFilterCnt = 0;
+        if (childFilter != null){
+            childFilterCnt =  informationDao.queryChildFilter(childFilter.getChildFilterId());
+        }
+
         Integer recordFilterCnt = informationDao.queryArticleRecordFilter(recordFilter.getFilterId());
         Integer urlRecordRelationCnt = informationDao.queryUrlRecordRelation(urlMonitorEntity.getName());
-        String res = "";
+        //JSONObject jsonObject = new JSONObject();
+
         if (urlCnt > 0) {
             res = "网址已存在！";
-            throw new CustomException(3, res);
+            //throw new CustomException(3, res);
+            jsonResult.setReturnCode("3");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
         } else if (childFilterCnt > 0) {
             res = "子页过滤条件名已存在";
-            throw new CustomException(3, res);
+            jsonResult.setReturnCode("3");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
+            //throw new CustomException(3, res);
         } else if (recordFilterCnt > 0) {
             res = "列表记录筛选规则名已存在";
-            throw new CustomException(3, res);
+            jsonResult.setReturnCode("3");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
+            //throw new CustomException(3, res);
         } else if (urlRecordRelationCnt > 0) {
             res = "已存在相同筛选RULE";
-            throw new CustomException(3, res);
+            jsonResult.setReturnCode("3");
+            jsonResult.setReturnMsg(res);
+            return jsonResult;
+            //throw new CustomException(3, res);
         }
+        //jsonObject.put("messageStr", res);
+        //WebSocketServer.sendWebSocketMessage(jsonObject, sid);
+
         informationDao.saveUrlEntity(urlMonitorEntity);
-        informationDao.saveNetChildFilter(childFilter);
+        //存在子网页的时候
+        if (childFilter != null)
+            informationDao.saveNetChildFilter(childFilter);
         informationDao.saveRecordFilter(recordFilter);
         Map<String, String> relationParam = new HashMap<>();
         relationParam.put("urlName", urlMonitorEntity.getName());
-        relationParam.put("childFilterId", childFilter.getChildFilterId());
+        relationParam.put("childFilterId", childFilter == null ? null : childFilter.getChildFilterId());
         relationParam.put("recordFilterId", recordFilter.getFilterId());
         informationDao.saveUrlRecordRelation(relationParam);
-
+        res = "保存成功";
+        jsonResult.setReturnCode("0");
+        jsonResult.setReturnMsg(res);
+        return jsonResult;
     }
 
     @Override
