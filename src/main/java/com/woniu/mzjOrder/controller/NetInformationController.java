@@ -5,7 +5,6 @@ import com.woniu.mzjOrder.entity.UrlMonitorEntity;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
-import com.woniu.mzjOrder.vo.NetUrlVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

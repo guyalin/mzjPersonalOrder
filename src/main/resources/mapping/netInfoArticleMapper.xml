@@ -3,7 +3,7 @@
 <mapper namespace="com.woniu.mzjOrder.dao.NetInformationDao">
 
     <insert id="saveArticleRecords" parameterType="list">
-        insert ignore into t_net_article (
+        insert ignore into  t_net_article(
             root_url,connect_url,title,target_url,article_name,article_title,area,date_time
         ) values
         <foreach item="item" collection="list" separator=",">
