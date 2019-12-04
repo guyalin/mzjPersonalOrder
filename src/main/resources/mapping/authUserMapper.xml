@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.woniu.mzjOrder.dao.UserPrivilegeDao">
+
+    <resultMap id="authInfo" type="com.woniu.mzjOrder.entity.AuthUserInfo">
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="user_passwd" jdbcType="VARCHAR" property="userPassWd"/>
+        <result column="role_id" jdbcType="VARCHAR" property="roleId"/>
+        <result column="last_login_time" jdbcType="VARCHAR" property="lastLoginTime"/>
+        <collection property="privileges" ofType="java.lang.String">
+            <constructor>
+                <arg column="privilege_id"/>
+            </constructor>
+        </collection>
+    </resultMap>
+    <update id="updUserLoginInfo">
+        update t_auth_user
+        set last_login_time = CURRENT_TIMESTAMP()
+        where user_id = #{userAccount}
+    </update>
+
+    <select id="queryUserInfoById" resultMap="authInfo">
+        select u.user_id, u.user_name,
+               u.last_login_time,rp.privilege_id
+        from t_auth_user u,
+             t_auth_user_ro ur, t_auth_ro_pv rp
+        where u.user_id = #{userAccount}
+        and u.user_id = ur.user_id
+        and ur.role_id = rp.role_id
+
+    </select>
+    <select id="queryUserById" resultType="com.woniu.mzjOrder.entity.AuthUser">
+        select user_id as userId, user_name as userName, user_passwd as userPassWd,
+               create_time as createTime, is_locked as isLocked, last_login_time as lastLoginTime
+        from t_auth_user
+        where user_id = #{userId}
+    </select>
+    <select id="queryRoleByUser" resultType="com.woniu.mzjOrder.entity.AuthRole">
+        select r.role_id as roleId, r.role_name as roleName
+        from t_auth_role r, t_auth_user_ro ur
+        where r.role_id = ur.role_id
+        and ur.user_id = #{userId}
+    </select>
+    <select id="queryPrivilegeByRole" resultType="com.woniu.mzjOrder.entity.AuthPrivilege">
+        select p.privilege_id as privilegeId, p.privilege_name as privilegeName
+        from t_auth_privilege p, t_auth_ro_pv rp
+        where p.privilege_id = rp.privilege_id
+        and find_in_set(rp.role_id, #{roleIds})
+    </select>
+</mapper>
