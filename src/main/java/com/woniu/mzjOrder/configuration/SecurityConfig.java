@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests().antMatchers(HttpMethod.OPTIONS, "/**").permitAll() //放行所有
-                .antMatchers("/auth/**", "/login",
+                .antMatchers("/auth/**", "/login","/websocket/**",
                         "/js/**", "/bootstrap/**", "/css/**", "/images/**",  "/fonts/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()//设置可跨域请求时的放行
                 .anyRequest().authenticated()

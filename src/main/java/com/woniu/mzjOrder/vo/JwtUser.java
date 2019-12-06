@@ -51,6 +51,10 @@ public class JwtUser implements UserDetails {
         return this.lastLoginTime;
     }
 
+    public Integer getIsLocked(){
+        return this.isLocked;
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

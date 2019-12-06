@@ -14,13 +14,16 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -67,8 +70,10 @@ public class AuthUserServiceImpl implements AuthUserService {
     }
 
     @Override
+    @Transactional
     public JsonResult loginChecking(AuthUserVo authUser) {
         JsonResult jsonResult = new JsonResult();
+        String returnMsg = "";
         if (StringUtils.isEmpty(authUser.getUserId())){
             jsonResult.setReturnMsg("用户名不能为空");
             jsonResult.setReturnCode("-1");
@@ -79,21 +84,39 @@ public class AuthUserServiceImpl implements AuthUserService {
             jsonResult.setReturnCode("-1");
             return jsonResult;
         }
-        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(authUser.getUserId(), authUser.getPassWd());
-        Authentication authentication = authenticationManager.authenticate(upToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(authUser.getUserId());
-        String token = jwtTokenUtil.generateToken(userDetails);
-        AuthUserInfo userInfo = new AuthUserInfo();
-        userInfo.setUserId(userDetails.getUsername());
-        userInfo.setUserName(((JwtUser)userDetails).getUserRealName());
-        userInfo.setLastLoginTime(((JwtUser)userDetails).getLastLoginTime());
-        userInfo.setPrivileges(userDetails.getAuthorities());
-        userInfo.setToken(token);
-        jsonResult.setReturnMsg("登录成功");
-        jsonResult.setReturnCode("200");
-        jsonResult.setData(userInfo);
-        return jsonResult;
+        try {
+            UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(authUser.getUserId(), authUser.getPassWd());
+            Authentication authentication = authenticationManager.authenticate(upToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(authUser.getUserId());
+            if (((JwtUser)userDetails).getIsLocked() == 1){
+                jsonResult.setReturnMsg("用户已锁定");
+                jsonResult.setReturnCode("-2");
+                return jsonResult;
+            }
+            String token = jwtTokenUtil.generateToken(userDetails);
+            AuthUserInfo userInfo = new AuthUserInfo();
+            userInfo.setUserId(userDetails.getUsername());
+            userInfo.setUserName(((JwtUser)userDetails).getUserRealName());
+            userInfo.setLastLoginTime(((JwtUser)userDetails).getLastLoginTime());
+            userInfo.setPrivileges(userDetails.getAuthorities());
+            userInfo.setToken(token);
+            userPrivilegeDao.updUserLoginInfo(authUser.getUserId());
+            jsonResult.setReturnMsg("登录成功");
+            jsonResult.setReturnCode("200");
+            jsonResult.setData(userInfo);
+            return jsonResult;
+        }catch (Exception e){
+            if (e instanceof BadCredentialsException) {
+                returnMsg = "密码错误";
+            } else if (e instanceof UsernameNotFoundException) {
+                returnMsg = "账号不存在";
+            }
+            jsonResult.setReturnCode("-2");
+            jsonResult.setReturnMsg(returnMsg);
+            return jsonResult;
+        }
+
     }
 
     @Override
