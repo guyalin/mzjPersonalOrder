@@ -6,10 +6,12 @@ import com.woniu.mzjOrder.entity.AuthRole;
 import com.woniu.mzjOrder.entity.AuthUser;
 import com.woniu.mzjOrder.entity.AuthUserInfo;
 import com.woniu.mzjOrder.service.AuthUserService;
+import com.woniu.mzjOrder.service.NetLabelService;
 import com.woniu.mzjOrder.util.JwtTokenUtil;
 import com.woniu.mzjOrder.vo.AuthUserVo;
 import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.JwtUser;
+import com.woniu.mzjOrder.vo.NetLabelVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +51,8 @@ public class AuthUserServiceImpl implements AuthUserService {
     @Autowired
     @Qualifier("mzjUserDetailService")
     private UserDetailsService jwtUserDetailsService;
+    @Autowired
+    private NetLabelService netLabelService;
 
     @Override
     public JsonResult authUserLoginChecking(AuthUserVo authUser) {
@@ -101,6 +105,7 @@ public class AuthUserServiceImpl implements AuthUserService {
             userInfo.setLastLoginTime(((JwtUser)userDetails).getLastLoginTime());
             userInfo.setPrivileges(userDetails.getAuthorities());
             userInfo.setToken(token);
+            userInfo.setNetLabelVos(netLabelService.getNetLabelByUserId(authUser.getUserId()));
             userPrivilegeDao.updUserLoginInfo(authUser.getUserId());
             jsonResult.setReturnMsg("登录成功");
             jsonResult.setReturnCode("200");

@@ -105,7 +105,8 @@
         </if>
     </select>
     <select id="queryNetUrlEntity" resultType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
-        select url.name,
+        select url.url_id as urlId,
+               url.name,
                url.area,
                url.root_url as rootUrl,
                url.connect_url as connectUrl,

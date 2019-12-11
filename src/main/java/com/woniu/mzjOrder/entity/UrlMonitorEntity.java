@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class UrlMonitorEntity implements Serializable {
 
     private static final long serialVersionUID = 6977058622880828314L;
+    private String urlId;
     private String area;
     private String name;
     private String rootUrl;
