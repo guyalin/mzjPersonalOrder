@@ -14,6 +14,7 @@ public class NetInfoQueryParamVo implements Serializable {
     private String rootUrl;
     private Integer latestDays;
     private Integer descType;  //0时间优先， 1网址类型优先排序
+    private String netLabelId; //标签id
     private List<String> articleTitleRegex;
 
 }

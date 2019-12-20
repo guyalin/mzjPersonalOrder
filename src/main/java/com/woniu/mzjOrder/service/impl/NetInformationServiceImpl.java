@@ -13,6 +13,7 @@ import com.woniu.mzjOrder.exception.CustomException;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
+import com.woniu.mzjOrder.util.RedisUtil;
 import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
@@ -43,6 +44,8 @@ public class NetInformationServiceImpl implements NetInformationService {
     private NetInformationDao informationDao;
     @Autowired
     private WebClient webClient;
+    @Autowired
+    private RedisUtil redisUtil;
     /*@Autowired
     private WebSocketServer webSocketServer; //为什么是新的实例。*/
 
@@ -143,7 +146,7 @@ public class NetInformationServiceImpl implements NetInformationService {
 
     /**
      * 根据参数读取数据库中已经持久化的记录
-     *
+     * 20191220 查询时优先从redis中查询对应记录
      * @param queryParamVo
      * @return
      */

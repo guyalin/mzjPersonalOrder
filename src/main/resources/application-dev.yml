@@ -14,6 +14,14 @@ spring:
       initial-size: 5                               # 初始化提供的连接数
       max-total: 5                                  # 最大的连接数
       max-wait-millis: 200                          # 等待连接获取的最大超时时间
+  redis:
+    host: localhost
+    port: 6379
+    max-wait: 30000 #连接池最大阻塞时间（负值表示无限制）
+    max-active: 100 #连接池最大连接数（负值表示无限制）
+    max-idle: 20 #连接池中最大空闲连接
+    min-idle: 0 #连接池中最小空闲时间
+    timeout: 3000 #连接超时
 
 mybatis:
   mapper-locations: classpath:mapping/*Mapper.xml
@@ -25,10 +33,3 @@ logging:
     com:
       example:
         mapper : debug
-
-#localFileProporties
-local:
-  gis-map:
-    root-path: G:\workfile\thinklink\gismap\map
-  net-file:
-    root-path: E:\QMDownload\netFile

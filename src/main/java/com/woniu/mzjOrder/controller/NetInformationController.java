@@ -2,9 +2,12 @@ package com.woniu.mzjOrder.controller;
 
 import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
+import com.woniu.mzjOrder.filter.SecurityUserHelper;
 import com.woniu.mzjOrder.service.NetInformationService;
+import com.woniu.mzjOrder.service.NetLabelService;
 import com.woniu.mzjOrder.vo.JsonResult;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
+import com.woniu.mzjOrder.vo.NetLabelVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,8 @@ public class NetInformationController {
 
     @Autowired
     private NetInformationService netInformationService;
+    @Autowired
+    private NetLabelService netLabelService;
 
     @GetMapping(value = "/important/article/persistence")
     public JsonResult loadNetNewsArticleToDB() {
@@ -48,7 +53,7 @@ public class NetInformationController {
         JsonResult jsonResult = new JsonResult();
         try {
             netInformationService.queryNetNewsArticle(queryParamVo);
-            netInformationService.saveToLocalFile();
+            //netInformationService.saveToLocalFile();
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
@@ -77,22 +82,6 @@ public class NetInformationController {
         }
     }
 
-
-    @GetMapping(value = "/important/article/monitor")
-    public JsonResult activeMonitorClient() {
-        JsonResult jsonResult = new JsonResult();
-        try {
-
-            jsonResult.setReturnCode("SUCC");
-            jsonResult.setReturnMsg("成功");
-            return jsonResult;
-        } catch (Exception e) {
-            jsonResult.setReturnCode("FAIL");
-            jsonResult.setReturnMsg("失败");
-            jsonResult.setData("message:" + e.toString());
-            return jsonResult;
-        }
-    }
 
     @GetMapping(value = "/important/article/netUrl")
     public JsonResult queryActiveNetEntities() {
@@ -153,6 +142,51 @@ public class NetInformationController {
             jsonResult.setReturnMsg("失败" + e.toString());
             return jsonResult;
         }
+
+    }
+
+    @GetMapping("/label/query")
+    public JsonResult netLabelQuery(){
+        JsonResult jsonResult = new JsonResult();
+        try {
+            String userId = SecurityUserHelper.getCurrentPrincipal().getUsername();
+            List<NetLabelVo> netLabelVos = netLabelService.getNetLabelByUserId(userId);
+            jsonResult.setReturnCode(JsonResult.SUCC);
+            jsonResult.setData(netLabelVos);
+            jsonResult.setReturnMsg("查询成功");
+        }catch (Exception e){
+            jsonResult.setReturnCode(JsonResult.FAIL);
+            jsonResult.setReturnMsg("查询失败，"+ e.toString());
+        }
+        return jsonResult;
+    }
+
+    @PostMapping(value = "/label/save")
+    public JsonResult netLabelSave(@RequestBody NetLabelVo netLabelVo){
+        JsonResult jsonResult = new JsonResult();
+        try {
+            Integer i = netLabelService.saveOrUpdNetLabel(netLabelVo);
+            jsonResult.setReturnCode(JsonResult.SUCC);
+            jsonResult.setReturnMsg("插入成功, 新增"+i+"条");
+        }catch (Exception e){
+            jsonResult.setReturnCode(JsonResult.FAIL);
+            jsonResult.setReturnMsg("新增标签失败，"+ e.toString());
+        }
+        return jsonResult;
+    }
+
+    @RequestMapping(value = "/label/del", method = RequestMethod.POST)
+    public JsonResult netLabelDelete(@RequestBody String labelId){
+        JsonResult jsonResult = new JsonResult();
+        try {
+            Integer i = netLabelService.delNetLabel(labelId);
+            jsonResult.setReturnCode(JsonResult.SUCC);
+            jsonResult.setReturnMsg("删除成功, 删除"+i+"条");
+        }catch (Exception e){
+            jsonResult.setReturnCode(JsonResult.FAIL);
+            jsonResult.setReturnMsg("删除标签失败，"+ e.toString());
+        }
+        return jsonResult;
 
     }
 

@@ -108,9 +108,9 @@ public class NetInfoRuleBeanConfig {
      * 写入本地文件器
      */
     @Bean(destroyMethod = "destroy")
-    public LocalFileWriterBean localFileWriterBean(@Value("${local.net-file.root-path}") String path) {
+    public LocalFileWriterBean localFileWriterBean() {
         LocalFileWriterBean localFileWriterBean = new LocalFileWriterBean();
-        localFileWriterBean.setLocalFilePath(path);
+        localFileWriterBean.setLocalFilePath("");
         return localFileWriterBean;
     }
 
