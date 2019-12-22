@@ -14,10 +14,7 @@ import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
 import com.woniu.mzjOrder.util.RedisUtil;
-import com.woniu.mzjOrder.vo.JsonResult;
-import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
-import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
-import com.woniu.mzjOrder.vo.ResultStatusEnum;
+import com.woniu.mzjOrder.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.eclipse.jetty.util.StringUtil;
@@ -27,9 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -58,9 +57,15 @@ public class NetInformationServiceImpl implements NetInformationService {
      * 用Jsoup实现
      */
     @Override
-    public void loadNetNewsArticleToDB() {
+    public void loadNetNewsArticleToDB(String netList) {
         List<ArticleRecord> articleList;
-        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity();
+        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity(netList);
+        //redis中删除相关网址的记录
+        if (StringUtils.isEmpty(netList)){
+            redisUtil.clearAll();
+        }else
+            redisUtil.del(netList.split(","));
+
         recordListForOneQueryFailed = new ArrayList<>();
         /*Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
         Map<String, Integer> netIsActiveNodeMap = infoRuleMapBean.getNetIsActiveNodeMap();
@@ -75,6 +80,7 @@ public class NetInformationServiceImpl implements NetInformationService {
             //String message = recordListForOneQueryFailed.toString();
             /**
              * 考虑做成自定义异常。通过自定义异常处理，统一推送到客户端
+             * 20191220 考虑放弃，异常做业务不太好
              */
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("failedUrls", recordListForOneQueryFailed);
@@ -152,8 +158,36 @@ public class NetInformationServiceImpl implements NetInformationService {
      */
     @Override
     public List<ArticleRecord> queryNetNewsArticle(NetInfoQueryParamVo queryParamVo) {
-        recordListForOneQuery = informationDao.queryArticleRecordsByParams(queryParamVo);
-        return recordListForOneQuery;
+        List<ArticleRecord> articleRecords = new ArrayList<>();
+        // recordListForOneQuery
+        //先从redis中获取对应key值的记录
+        List<String> netList;
+        List<String> netListForQuery = new ArrayList<>(); //需要从数据库中查询的key
+        String netsStr = queryParamVo.getNetList();
+        if (StringUtils.isEmpty(netsStr)){
+            netList = informationDao.queryNetUrlEntity(null).stream().map(UrlMonitorEntity::getUrlId).collect(Collectors.toList());
+        }else
+            netList = Arrays.asList(netsStr.split(","));
+        netList.forEach(t->{
+            if (redisUtil.get(t) == null){
+                netListForQuery.add(t);
+            }else {
+                articleRecords.addAll((Collection<? extends ArticleRecord>) redisUtil.get(t));
+            }
+        });
+        if (netListForQuery.size() == 0){
+            return articleRecords;
+        }
+        queryParamVo.setNetList(String.join(",",netListForQuery));
+        //查出来的都是redis不存在的
+        List<NetBodyMapVo> netBodyMapVos = informationDao.queryArticleRecordsByParams(queryParamVo);
+        if (netBodyMapVos != null)
+            netBodyMapVos.forEach(netMapVo->{
+                redisUtil.set(netMapVo.getNetId(), netMapVo.getArticleRecords());
+                articleRecords.addAll(netMapVo.getArticleRecords());
+            });
+
+        return articleRecords;
     }
 
     @Override
@@ -163,7 +197,7 @@ public class NetInformationServiceImpl implements NetInformationService {
 
     @Override
     public List<UrlMonitorEntity> queryUrlEntities() {
-        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity();
+        List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity(null);
         return urlEntities;
     }
 

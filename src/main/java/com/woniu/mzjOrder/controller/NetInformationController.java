@@ -27,10 +27,10 @@ public class NetInformationController {
     private NetLabelService netLabelService;
 
     @GetMapping(value = "/important/article/persistence")
-    public JsonResult loadNetNewsArticleToDB() {
+    public JsonResult loadNetNewsArticleToDB(@RequestParam(value = "netList", required = false) String netList) {
         JsonResult jsonResult = new JsonResult();
         try {
-            netInformationService.loadNetNewsArticleToDB();
+            netInformationService.loadNetNewsArticleToDB(netList);
             jsonResult.setReturnCode("SUCC");
             jsonResult.setReturnMsg("成功");
             return jsonResult;
@@ -48,7 +48,7 @@ public class NetInformationController {
      * @param queryParamVo
      * @return
      */
-    @PostMapping(value = "/important/article/download")
+/*    @PostMapping(value = "/important/article/download")
     public JsonResult queryNetInfoArticleToLocalFile(@RequestBody NetInfoQueryParamVo queryParamVo) {
         JsonResult jsonResult = new JsonResult();
         try {
@@ -63,7 +63,7 @@ public class NetInformationController {
             jsonResult.setData("message:" + e.toString());
             return jsonResult;
         }
-    }
+    }*/
 
     @PostMapping(value = "/important/article/recordInfo")
     public JsonResult queryNetArticleInfo(@RequestBody NetInfoQueryParamVo queryParamVo) {

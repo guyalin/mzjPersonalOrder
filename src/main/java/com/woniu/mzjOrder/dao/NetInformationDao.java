@@ -4,6 +4,7 @@ import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
+import com.woniu.mzjOrder.vo.NetBodyMapVo;
 import com.woniu.mzjOrder.vo.NetInfoQueryParamVo;
 import org.apache.ibatis.annotations.Param;
 import org.omg.CORBA.INTERNAL;
@@ -17,9 +18,9 @@ public interface NetInformationDao {
 
     void saveArticleRecords(List<ArticleRecord> records);
 
-    List<ArticleRecord> queryArticleRecordsByParams(@Param("paramVo") NetInfoQueryParamVo paramVo);
+    List<NetBodyMapVo> queryArticleRecordsByParams(@Param("paramVo") NetInfoQueryParamVo paramVo);
 
-    List<UrlMonitorEntity> queryNetUrlEntity();
+    List<UrlMonitorEntity> queryNetUrlEntity(String netList);
 
 
     Integer queryUrlEntity(String urlId);

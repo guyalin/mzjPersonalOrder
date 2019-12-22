@@ -2,12 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.woniu.mzjOrder.dao.NetInformationDao">
 
+    <resultMap id="netBodyMapVo" type="com.woniu.mzjOrder.vo.NetBodyMapVo">
+        <result column="netId" jdbcType="VARCHAR" property="netId"/>
+        <collection property="articleRecords" ofType="com.woniu.mzjOrder.entity.ArticleRecord">
+            <result column="urlId" property="urlId"/>
+            <result column="connectUrl" property="connectUrl"/>
+            <result column="urlTitle" property="urlTitle"/>
+            <result column="targetUrl" property="targetUrl"/>
+            <result column="articleName" property="articleName"/>
+            <result column="articleTitle" property="articleTitle"/>
+            <result column="area" property="area"/>
+            <result column="dateTime" property="dateTime"/>
+        </collection>
+    </resultMap>
+
     <insert id="saveArticleRecords" parameterType="list">
         insert ignore into  t_net_article(
-            root_url,connect_url,title,target_url,article_name,article_title,area,date_time
+            url_id,connect_url,title,target_url,article_name,article_title,area,date_time
         ) values
         <foreach item="item" collection="list" separator=",">
-            (#{item.rootUrl},#{item.connectUrl},#{item.urlTitle},#{item.targetUrl},#{item.articleName},
+            (#{item.urlId},#{item.connectUrl},#{item.urlTitle},#{item.targetUrl},#{item.articleName},
              #{item.articleTitle},#{item.area},#{item.dateTime})
         </foreach>
     </insert>
@@ -77,9 +91,16 @@
     </insert>
 
     <select id="queryArticleRecordsByParams" parameterType="com.woniu.mzjOrder.vo.NetInfoQueryParamVo"
-            resultType="com.woniu.mzjOrder.entity.ArticleRecord">
-        select root_url as rootUrl,connect_url as connectUrl, title as urlTitle,target_url as targetUrl,
-               article_name as articleName,article_title as articleTitle,area,date_time as dateTime
+            resultMap="netBodyMapVo">
+        select url_id as netId,
+               url_id as urlId,
+               connect_url as connectUrl,
+               title as urlTitle,
+               target_url as targetUrl,
+               article_name as articleName,
+               article_title as articleTitle,
+               area,
+               date_time as dateTime
         from t_net_article
         where 1 = 1
         <if test="paramVo != null and paramVo.area != null">
@@ -87,6 +108,9 @@
         </if>
         <if test="paramVo != null and paramVo.netName != null">
             AND article_name like CONCAT('%',#{paramVo.netName},'%')
+        </if>
+        <if test="paramVo != null and paramVo.netList != null">
+            AND find_in_set(url_id, #{paramVo.netList})
         </if>
         <if test="paramVo != null and paramVo.latestDays != null">
             <![CDATA[AND date_time >= date_sub(CURRENT_DATE(), interval #{paramVo.latestDays} day)]]>
@@ -143,6 +167,9 @@
         left join t_net_record_filter rf on fr.record_filter_id = rf.filter_id
         where url.active = 1
         and url.name = fr.url_name
+        <if test="netList != null and netList != ''">
+            and find_in_set(url.url_id, #{netList})
+        </if>
     </select>
     <select id="queryUrlEntity" resultType="java.lang.Integer">
         select count(1) as cnt

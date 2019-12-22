@@ -83,6 +83,17 @@ public class RedisUtil {
         }
     }
 
+    public void del(List<String> keys){
+        if(keys!=null&&keys.size()>0){
+            redisTemplate.delete(keys);
+        }
+    }
+
+    public void clearAll(){
+        Set<String> keys = redisTemplate.keys("*");
+        redisTemplate.delete(keys);
+    }
+
     //============================String=============================
     /**
      * 普通缓存获取

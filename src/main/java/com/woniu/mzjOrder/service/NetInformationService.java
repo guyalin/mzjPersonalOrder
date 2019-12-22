@@ -21,7 +21,7 @@ import java.util.List;
 
 public interface NetInformationService {
 
-    void loadNetNewsArticleToDB() throws IOException;
+    void loadNetNewsArticleToDB(String netList) throws IOException;
 
     List<ArticleRecord> queryNetNewsArticle(NetInfoQueryParamVo infoQueryParamVo);
 
