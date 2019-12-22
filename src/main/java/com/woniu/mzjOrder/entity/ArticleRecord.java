@@ -10,7 +10,7 @@ public class ArticleRecord implements Serializable {
 
     private static final long serialVersionUID = 3450829660309603886L;
 
-    private String rootUrl;
+    private String urlId;
     private String connectUrl;
     private String urlTitle;
     private String area;

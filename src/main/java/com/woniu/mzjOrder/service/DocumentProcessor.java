@@ -44,7 +44,7 @@ public interface DocumentProcessor {
                 linkStr = linkStr.replaceAll("\\.\\./", "");
                 linkStr = linkStr.replaceAll("\\./", "/");
                 if (!linkStr.startsWith("http:") && !linkStr.startsWith("https:")) {
-                    linkStr = urlMonitorEntity.getRootUrl().concat(linkStr);
+                    linkStr = urlMonitorEntity.getUrlId().concat(linkStr);
                 }*/
                 String linkStrUrl = link.attr("href");
                 URI baseUrl = new URI(document.baseUri());
@@ -53,7 +53,7 @@ public interface DocumentProcessor {
                 String linkStr = linkStrURI.toString();
                 record.setArea(urlMonitorEntity.getArea());
                 record.setArticleName(urlMonitorEntity.getName());
-                record.setRootUrl(urlMonitorEntity.getRootUrl());
+                record.setUrlId(urlMonitorEntity.getUrlId());
                 record.setConnectUrl(urlMonitorEntity.getConnectUrl());
                 record.setUrlTitle(document.title());
                 DateRule dateRule = nodeRule.getDateRule();

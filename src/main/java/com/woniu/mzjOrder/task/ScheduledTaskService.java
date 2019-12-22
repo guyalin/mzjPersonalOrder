@@ -25,7 +25,8 @@ public class ScheduledTaskService {
     @Scheduled(cron = "00 30 08 * * *")
     private void updateNetArticleRecord(){
         try {
-            netInformationService.loadNetNewsArticleToDB();
+            //全量更新
+            netInformationService.loadNetNewsArticleToDB(null);
             log.info("taskScheduled start...");
         } catch (Exception e) {
             e.printStackTrace();
