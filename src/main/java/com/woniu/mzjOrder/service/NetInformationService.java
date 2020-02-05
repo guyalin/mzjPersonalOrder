@@ -31,7 +31,7 @@ public interface NetInformationService {
 
     void sendWebSocketMessage(WebSocketServer socketServer, Object message);
 
-    JsonResult saveNetUrl(UrlMonitorEntity netUrlVo, String sid);
+    JsonResult saveNetUrl(UrlMonitorEntity netUrlVo);
 
     List<ArticleRecord> testUrlEntity(UrlMonitorEntity urlMonitorEntity);
 
@@ -41,7 +41,7 @@ public interface NetInformationService {
         ArticleRecordFilter articleRecordFilter = parentUrlEntity.getArticleRecordFilter();
         String parentName = parentUrlEntity.getName();
         String parentArea = parentUrlEntity.getArea();
-
+        Integer isNeedTranslate = parentUrlEntity.getIsTranslate();
         String childRootTag = childDocumentRule.getRootTag();
         /*String rootAreaTag = childDocumentRule.getRootAreaTag();
         Integer rootAreaTagIndex = childDocumentRule.getRootAreaTagIndex();
@@ -66,7 +66,7 @@ public interface NetInformationService {
         for (Element childRecord : childRecords) {
             String childName = parentName.concat("-").concat(DocumentUtil.getLocationText(childRecord, nameLocation, childNameTag, childNameTagIndex, nameAttr));
             String childRootUrl = DocumentUtil.getLocationText(childRecord, childRootUrlLocation, childRootUrlTag, childRootUrlTagIndex, urlAttrName);
-            UrlMonitorEntity urlMonitorEntity = new UrlMonitorEntity(entityArea, childName, childRootUrl, childRootUrl,"");
+            UrlMonitorEntity urlMonitorEntity = new UrlMonitorEntity(entityArea, childName, childRootUrl, childRootUrl,isNeedTranslate);
             urlMonitorEntity.setArticleRecordFilter(articleRecordFilter);
             monitorEntities.add(urlMonitorEntity);
         }

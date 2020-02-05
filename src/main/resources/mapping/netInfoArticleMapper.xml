@@ -26,11 +26,13 @@
         </foreach>
     </insert>
     <insert id="saveUrlEntity" parameterType="com.woniu.mzjOrder.entity.UrlMonitorEntity">
-        insert into t_net_url (area, name, root_url, connect_url, active)
-        values (#{urlMonitorEntity.area},
+        insert into t_net_url (url_id, area, name, root_url, connect_url, is_translate, active)
+        values (#{urlMonitorEntity.urlId},
+                #{urlMonitorEntity.area},
                 #{urlMonitorEntity.name},
                 #{urlMonitorEntity.rootUrl},
                 #{urlMonitorEntity.connectUrl},
+                #{urlMonitorEntity.isTranslate},
                 1)
     </insert>
     <insert id="saveNetChildFilter" parameterType="com.woniu.mzjOrder.entity.NetChildFilter">
@@ -134,7 +136,7 @@
                url.area,
                url.root_url as rootUrl,
                url.connect_url as connectUrl,
-               url.target_url_pattern as targetUrlPattern,
+               url.is_translate as isTranslate,
                cf.child_filter_id as "NetChildFilter.childFilterId",
                cf.root_tag as "NetChildFilter.rootTag",
                cf.record_tag as "NetChildFilter.recordTag",
@@ -190,5 +192,9 @@
         select count(1) as cnt
         from t_net_url_filter_rule
         where url_name = #{name}
+    </select>
+    <select id="queryUrlMaxId" resultType="java.lang.Integer">
+        select max(url_id) as maxId
+        from t_net_url
     </select>
 </mapper>

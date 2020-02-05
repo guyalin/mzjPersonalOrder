@@ -25,6 +25,8 @@ public interface NetInformationDao {
 
     Integer queryUrlEntity(String urlId);
 
+    Integer queryUrlMaxId();
+
     void saveUrlEntity(@Param("urlMonitorEntity") UrlMonitorEntity urlMonitorEntity);
 
     Integer queryChildFilter(String childFilterId);

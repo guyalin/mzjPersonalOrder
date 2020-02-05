@@ -16,6 +16,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * @description:
@@ -34,6 +36,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        Enumeration ss = request.getParameterNames();
         String tokenHead = "Bearer ";
 
         if (StringUtils.isNotEmpty(authHeader) && authHeader.startsWith(tokenHead)){

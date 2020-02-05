@@ -26,8 +26,13 @@ public class NetInformationController {
     @Autowired
     private NetLabelService netLabelService;
 
-    @GetMapping(value = "/important/article/persistence")
-    public JsonResult loadNetNewsArticleToDB(@RequestParam(value = "netList", required = false) String netList) {
+    /**
+     * 更新网页内容
+     * @param netList
+     * @return
+     */
+    @PostMapping(value = "/important/article/persistence")
+    public JsonResult loadNetNewsArticleToDB(@RequestBody(required = false) String netList) {
         JsonResult jsonResult = new JsonResult();
         try {
             netInformationService.loadNetNewsArticleToDB(netList);
@@ -65,6 +70,11 @@ public class NetInformationController {
         }
     }*/
 
+    /**
+     * 查询新闻列表记录
+     * @param queryParamVo
+     * @return
+     */
     @PostMapping(value = "/important/article/recordInfo")
     public JsonResult queryNetArticleInfo(@RequestBody NetInfoQueryParamVo queryParamVo) {
         JsonResult jsonResult = new JsonResult();
@@ -82,7 +92,10 @@ public class NetInformationController {
         }
     }
 
-
+    /**
+     * 查询监控新闻列表
+     * @return
+     */
     @GetMapping(value = "/important/article/netUrl")
     public JsonResult queryActiveNetEntities() {
         JsonResult jsonResult = new JsonResult();
@@ -108,11 +121,11 @@ public class NetInformationController {
      * @param urlMonitorEntity
      * @return
      */
-    @PostMapping(value = "/important/url/save/{sid}")
-    public JsonResult saveNetUrl(@RequestBody UrlMonitorEntity urlMonitorEntity, @PathVariable("sid") String sid) {
+    @PostMapping(value = "/important/url/save")
+    public JsonResult saveNetUrl(@RequestBody UrlMonitorEntity urlMonitorEntity) {
         JsonResult jsonResult = new JsonResult();
         try {
-            jsonResult = netInformationService.saveNetUrl(urlMonitorEntity, sid);
+            jsonResult = netInformationService.saveNetUrl(urlMonitorEntity);
             return jsonResult;
         } catch (Exception e) {
             jsonResult.setReturnCode("FAIL");
@@ -145,6 +158,10 @@ public class NetInformationController {
 
     }
 
+    /**
+     * 查询标签
+     * @return
+     */
     @GetMapping("/label/query")
     public JsonResult netLabelQuery(){
         JsonResult jsonResult = new JsonResult();
@@ -161,6 +178,11 @@ public class NetInformationController {
         return jsonResult;
     }
 
+    /**
+     * 保存标签
+     * @param netLabelVo
+     * @return
+     */
     @PostMapping(value = "/label/save")
     public JsonResult netLabelSave(@RequestBody NetLabelVo netLabelVo){
         JsonResult jsonResult = new JsonResult();
@@ -175,6 +197,11 @@ public class NetInformationController {
         return jsonResult;
     }
 
+    /**
+     * 删除标签
+     * @param labelId
+     * @return
+     */
     @RequestMapping(value = "/label/del", method = RequestMethod.POST)
     public JsonResult netLabelDelete(@RequestBody String labelId){
         JsonResult jsonResult = new JsonResult();

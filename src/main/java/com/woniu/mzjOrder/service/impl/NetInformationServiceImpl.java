@@ -13,7 +13,8 @@ import com.woniu.mzjOrder.exception.CustomException;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
-import com.woniu.mzjOrder.util.RedisUtil;
+import com.woniu.mzjOrder.test.GoogTrans;
+//import com.woniu.mzjOrder.util.RedisUtil;
 import com.woniu.mzjOrder.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
@@ -43,8 +44,8 @@ public class NetInformationServiceImpl implements NetInformationService {
     private NetInformationDao informationDao;
     @Autowired
     private WebClient webClient;
-    @Autowired
-    private RedisUtil redisUtil;
+//    @Autowired
+//    private RedisUtil redisUtil;
     /*@Autowired
     private WebSocketServer webSocketServer; //为什么是新的实例。*/
 
@@ -61,10 +62,10 @@ public class NetInformationServiceImpl implements NetInformationService {
         List<ArticleRecord> articleList;
         List<UrlMonitorEntity> urlEntities = informationDao.queryNetUrlEntity(netList);
         //redis中删除相关网址的记录
-        if (StringUtils.isEmpty(netList)){
+        /*if (StringUtils.isEmpty(netList)){
             redisUtil.clearAll();
         }else
-            redisUtil.del(netList.split(","));
+            redisUtil.del(netList.split(","));*/
 
         recordListForOneQueryFailed = new ArrayList<>();
         /*Map<String, DocumentProcessor> allProcessorMap = infoRuleMapBean.getNetInfoRules();
@@ -74,6 +75,7 @@ public class NetInformationServiceImpl implements NetInformationService {
 
         //articleList = getNewsArticle(urlEntities, netIsActiveNodeMap, hasChildNetSiteMap, childDocumentRuleMap);
         articleList = getNewsArticle(urlEntities, new ProcessorForGov_Common());
+
         saveToDB(articleList);
         //推送更新异常的网站信息
         if (recordListForOneQueryFailed.size() > 0) {
@@ -107,15 +109,31 @@ public class NetInformationServiceImpl implements NetInformationService {
                 DocumentProcessor processor = documentProcessor;
                 Integer hasChildSite = (childFilter == null ? 0 : 1);
 
-                Document document;
+                Document document = null;
                 if (isActiveNode != null && isActiveNode == 1) {
                     HtmlPage page = null;
                     page = webClient.getPage(urlEntity.getConnectUrl());
                     webClient.waitForBackgroundJavaScript(3000);//异步JS执行需要耗时,所以这里线程要阻塞3秒,等待异步JS执行结束
                     String pageXml = page.asXml();//直接将加载完成的页面转换成xml格式的字符串
                     document = Jsoup.parse(pageXml);//获取html文档
+                    document.setBaseUri(urlEntity.getRootUrl());
                 } else {
-                    document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(10000).get();
+                    Integer timeOutLen = 0;
+                    if (urlEntity.getIsTranslate() == 0){
+                        timeOutLen = 30000;
+                    }else
+                        timeOutLen = 50000;
+                    int connTimes = 0;
+                    //超时重连5次
+                    while (document == null && connTimes <= 5){
+                        try {
+                            document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(timeOutLen).get();
+                        }catch (Exception e){
+                            if(connTimes++ == 5){
+                                throw new Exception(e);
+                            }
+                        }
+                    }
                 }
                 //深度优先加载每个子页面
                 if (hasChildSite != null && hasChildSite == 1) {
@@ -130,6 +148,11 @@ public class NetInformationServiceImpl implements NetInformationService {
                 }
                 if (processor != null) {
                     List<ArticleRecord> records = processor.findAndExplainToArticleRecord(document, urlEntity);
+                    records.forEach(record->{
+                        if (urlEntity.getIsTranslate() == 1){
+                            record.setArticleTitle(googTranslate(record.getArticleTitle()));//谷歌翻译
+                        }
+                    });
                     articleList.addAll(records);
                 }
             } catch (Exception e) {
@@ -150,6 +173,16 @@ public class NetInformationServiceImpl implements NetInformationService {
         }
     }
 
+    private String googTranslate(String text){
+        GoogTrans gt = GoogTrans.getInstance();
+        String transedStr = null;
+        try {
+            transedStr = gt.translateText(text, "auto", "zh_cn");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return transedStr;
+    }
     /**
      * 根据参数读取数据库中已经持久化的记录
      * 20191220 查询时优先从redis中查询对应记录
@@ -169,11 +202,12 @@ public class NetInformationServiceImpl implements NetInformationService {
         }else
             netList = Arrays.asList(netsStr.split(","));
         netList.forEach(t->{
-            if (redisUtil.get(t) == null){
+            /*if (redisUtil.get(t) == null){
                 netListForQuery.add(t);
             }else {
                 articleRecords.addAll((Collection<? extends ArticleRecord>) redisUtil.get(t));
-            }
+            }*/
+            netListForQuery.add(t);
         });
         if (netListForQuery.size() == 0){
             return articleRecords;
@@ -183,7 +217,7 @@ public class NetInformationServiceImpl implements NetInformationService {
         List<NetBodyMapVo> netBodyMapVos = informationDao.queryArticleRecordsByParams(queryParamVo);
         if (netBodyMapVos != null)
             netBodyMapVos.forEach(netMapVo->{
-                redisUtil.set(netMapVo.getNetId(), netMapVo.getArticleRecords());
+                //redisUtil.set(netMapVo.getNetId(), netMapVo.getArticleRecords());
                 articleRecords.addAll(netMapVo.getArticleRecords());
             });
 
@@ -208,7 +242,7 @@ public class NetInformationServiceImpl implements NetInformationService {
 
     @Override
     @Transactional
-    public JsonResult saveNetUrl(UrlMonitorEntity urlMonitorEntity, String sid) {
+    public JsonResult saveNetUrl(UrlMonitorEntity urlMonitorEntity) {
         JsonResult jsonResult = new JsonResult();
         //UrlMonitorEntity urlMonitorEntity = netUrlVo.getUrlMonitorEntity();
         NetChildFilter childFilter = urlMonitorEntity.getNetChildFilter();
@@ -267,7 +301,8 @@ public class NetInformationServiceImpl implements NetInformationService {
         }
         //jsonObject.put("messageStr", res);
         //WebSocketServer.sendWebSocketMessage(jsonObject, sid);
-
+        Integer urlNewId = informationDao.queryUrlMaxId() + 1;
+        urlMonitorEntity.setUrlId(String.valueOf(urlNewId));
         informationDao.saveUrlEntity(urlMonitorEntity);
         //存在子网页的时候
         if (childFilter != null)

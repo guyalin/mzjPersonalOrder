@@ -3,11 +3,14 @@ package com.woniu.mzjOrder.util;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DateUtil {
+
+    static Calendar cal = Calendar.getInstance();
 
     static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     static DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -90,7 +93,13 @@ public class DateUtil {
             } else if (timeStr.matches("\\[[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]\\]")) {
                 time = format5.parse(timeStr);
             } else if (timeStr.matches("[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]{2}")) {
-                String year = new SimpleDateFormat("yyyy").format(new Date());
+                //String year = new SimpleDateFormat("yyyy").format(new Date());
+                String currentTimeStr = new SimpleDateFormat("MM-dd").format(new Date());
+                int year = cal.get(Calendar.YEAR);
+                if (timeStr.compareTo(currentTimeStr) > 0){
+                    year = year - 1;
+                }
+
                 timeStr = year + "-" + timeStr;
                 time = format1.parse(timeStr);
             }
