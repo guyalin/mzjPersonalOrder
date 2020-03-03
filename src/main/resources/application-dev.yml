@@ -33,3 +33,7 @@ logging:
     com:
       example:
         mapper : debug
+
+#phantomJS path
+phantomjs:
+  server-path: C:\\Users\\10460\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe

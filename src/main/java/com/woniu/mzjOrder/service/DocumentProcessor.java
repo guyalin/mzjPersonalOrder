@@ -58,7 +58,7 @@ public interface DocumentProcessor {
                 record.setUrlTitle(document.title());
                 DateRule dateRule = nodeRule.getDateRule();
                 String date = DocumentUtil.getLocationText(sourceRecord, dateRule.getLocation(), dateRule.getDateTag(), dateRule.getDateTagIndex(), dateRule.getFilterStr());
-                Date dateTime = DateUtil.StringToDate(date);
+                Date dateTime = DateUtil.regxStringToDate(date);
                 String dateStr = DateUtil.DateToString(dateTime);
                 record.setDateTime(dateStr);
                 record.setTargetUrl(linkStr);

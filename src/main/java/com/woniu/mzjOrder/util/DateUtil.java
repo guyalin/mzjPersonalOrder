@@ -84,7 +84,11 @@ public class DateUtil {
         try {
             if (timeStr.matches("[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]")) {
                 time = format1.parse(timeStr);
-            } else if (timeStr.matches("[0-9]{4}\\.[0-1]{0,1}[0-9]\\.[0-3]{0,1}[0-9]")) {
+            } else if(timeStr.matches("[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9] ([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]")) {
+                time = sdf.parse(timeStr);
+            } else if (timeStr.matches("[0-9]{4}\\.[0-1]{0,1}[0-9]\\.[0-3]{0,1}[0-9]") ||
+                    timeStr.matches("\\[[0-9]{4}\\.[0-1]{0,1}[0-9]\\.[0-3]{0,1}[0-9]\\]")) {
+                timeStr = timeStr.replaceAll("\\[", "").replaceAll("\\]", "");
                 time = format2.parse(timeStr);
             } else if (timeStr.matches("[0-9]{4}年[0-1]{0,1}[0-9]月[0-3]{0,1}[0-9]日")) {
                 time = format3.parse(timeStr);
@@ -92,18 +96,61 @@ public class DateUtil {
                 time = format4.parse(timeStr);
             } else if (timeStr.matches("\\[[0-9]{4}-[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]\\]")) {
                 time = format5.parse(timeStr);
-            } else if (timeStr.matches("[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]{2}")) {
+            } else if (timeStr.matches("[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]{2}") ||
+                    timeStr.matches("\\[[0-1]{0,1}[0-9]-[0-3]{0,1}[0-9]{2}\\]")) {
                 //String year = new SimpleDateFormat("yyyy").format(new Date());
+                String timeTempStr = timeStr.replaceAll("\\[", "").replaceAll("\\]", "");
                 String currentTimeStr = new SimpleDateFormat("MM-dd").format(new Date());
                 int year = cal.get(Calendar.YEAR);
-                if (timeStr.compareTo(currentTimeStr) > 0){
+                if (timeTempStr.compareTo(currentTimeStr) > 0){
                     year = year - 1;
                 }
 
-                timeStr = year + "-" + timeStr;
-                time = format1.parse(timeStr);
+                timeTempStr = year + "-" + timeTempStr;
+                time = format1.parse(timeTempStr);
             }
         } catch (Exception e) {
+            e.getStackTrace();
+        }
+        return time;
+    }
+
+    /**
+     * 转化成年月日
+     * @param timeStr
+     * @return
+     */
+    public static Date regxStringToDate(String timeStr){
+        Date time = null;
+        String dateStr = null;
+        String regx0 = "(\\d{4}).(\\d{1,2}).(\\d{1,2})";
+        String regx1 = "(\\d{1,2}).(\\d{1,2})";
+        try{
+            Pattern compile = Pattern.compile(regx0);
+            Matcher matcher = compile.matcher(timeStr);
+            if (matcher.find()){
+                String year = matcher.group(1);
+                String month = matcher.group(2);
+                String day = matcher.group(3);
+                dateStr = year + "-" + month + "-" + day;
+            } else {
+                compile = Pattern.compile(regx1);
+                matcher = compile.matcher(timeStr);
+                if (matcher.find()){
+                    String month = matcher.group(1);
+                    String day = matcher.group(2);
+                    String tempDate = month + "-" + day;
+                    String tempDateStr = format6.format(format6.parse(tempDate));
+                    String currentTimeStr = new SimpleDateFormat("MM-dd").format(new Date());
+                    int year = cal.get(Calendar.YEAR);
+                    if (tempDateStr.compareTo(currentTimeStr) > 0){
+                        year = year - 1;
+                    }
+                    dateStr = year + "-" + tempDateStr;
+                }
+            }
+            time = format1.parse(dateStr);
+        }catch (Exception e){
             e.getStackTrace();
         }
         return time;

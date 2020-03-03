@@ -16,6 +16,8 @@ public class AuthUser {
 
     private String userPassWd;
 
+    private String roleId;
+
     private Integer isLocked;
 
     private String lastLoginTime;

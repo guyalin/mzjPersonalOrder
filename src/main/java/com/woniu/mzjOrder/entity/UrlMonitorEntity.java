@@ -22,7 +22,8 @@ public class UrlMonitorEntity implements Serializable {
 
     }
 
-    public UrlMonitorEntity(String area,String name, String rootUrl, String connectUrl, Integer isTranslate){
+    public UrlMonitorEntity(String urlId, String area,String name, String rootUrl, String connectUrl, Integer isTranslate){
+        this.urlId = urlId;
         this.area = area;
         this.name = name;
         this.rootUrl = rootUrl;

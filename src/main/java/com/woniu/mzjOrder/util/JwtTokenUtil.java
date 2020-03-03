@@ -24,7 +24,8 @@ public class JwtTokenUtil implements Serializable {
      */
     private final String secret = "900213";
 
-    final static Long TIMESTAMP = 86400000L;
+    //final static Long TIMESTAMP = 86400000L;
+    final static Long TIMESTAMP = 24*60*60*1000L; //24小时过期
     final static String TOKEN_PREFIX = "Bearer";
 
     /**
@@ -35,6 +36,7 @@ public class JwtTokenUtil implements Serializable {
      */
     private String generateToken(Map<String, Object> claims) {
         Date expirationDate = new Date(System.currentTimeMillis() + TIMESTAMP);
+        System.out.println("token过期时间："+ expirationDate);
         return TOKEN_PREFIX + " " + Jwts.builder().setClaims(claims).setExpiration(expirationDate).signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 

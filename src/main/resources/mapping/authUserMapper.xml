@@ -12,6 +12,22 @@
             </constructor>
         </collection>
     </resultMap>
+    <insert id="saveOrUpdUserInfo">
+        insert into t_auth_user(user_id, user_name, user_passwd, role_id, create_time, is_locked)
+        values(
+                  #{authUser.userId},
+                  #{authUser.userName},
+                  #{authUser.userPassWd},
+                  #{authUser.roleId},
+                  CURRENT_TIMESTAMP(),
+                  #{authUser.isLocked}
+              )
+              on duplicate key update
+              user_name = values(user_name),
+              user_passwd = values(user_passwd),
+              role_id = values(role_id),
+              is_locked = values(is_locked)
+    </insert>
     <update id="updUserLoginInfo">
         update t_auth_user
         set last_login_time = CURRENT_TIMESTAMP()

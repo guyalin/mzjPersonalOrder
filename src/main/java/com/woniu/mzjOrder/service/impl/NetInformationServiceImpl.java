@@ -1,5 +1,7 @@
 package com.woniu.mzjOrder.service.impl;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
@@ -9,22 +11,26 @@ import com.woniu.mzjOrder.entity.ArticleRecord;
 import com.woniu.mzjOrder.entity.ArticleRecordFilter;
 import com.woniu.mzjOrder.entity.NetChildFilter;
 import com.woniu.mzjOrder.entity.UrlMonitorEntity;
-import com.woniu.mzjOrder.exception.CustomException;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.NetInformationService;
 import com.woniu.mzjOrder.service.processor.ProcessorForGov_Common;
 import com.woniu.mzjOrder.test.GoogTrans;
 //import com.woniu.mzjOrder.util.RedisUtil;
+import com.woniu.mzjOrder.util.HttpUtil;
+import com.woniu.mzjOrder.util.StopLoadPage;
 import com.woniu.mzjOrder.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.eclipse.jetty.util.StringUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
@@ -43,7 +49,9 @@ public class NetInformationServiceImpl implements NetInformationService {
     @Autowired
     private NetInformationDao informationDao;
     @Autowired
-    private WebClient webClient;
+    private WebDriver webDriver;
+//    @Autowired
+//    private WebClient webClient;
 //    @Autowired
 //    private RedisUtil redisUtil;
     /*@Autowired
@@ -105,18 +113,42 @@ public class NetInformationServiceImpl implements NetInformationService {
             try {
                 ArticleRecordFilter recordFilter = urlEntity.getArticleRecordFilter();
                 NetChildFilter childFilter = urlEntity.getNetChildFilter();
-                Integer isActiveNode = recordFilter.getIfActiveAsync();
+                int isActiveNode = recordFilter.getIfActiveAsync();
                 DocumentProcessor processor = documentProcessor;
                 Integer hasChildSite = (childFilter == null ? 0 : 1);
 
                 Document document = null;
-                if (isActiveNode != null && isActiveNode == 1) {
+                if (isActiveNode == 1) {
+
+                    final WebClient webClient = new WebClient(BrowserVersion.CHROME);//新建一个模拟谷歌Chrome浏览器的浏览器客户端对象
+                    webClient.getOptions().setThrowExceptionOnScriptError(false);//当JS执行出错的时候是否抛出异常, 这里选择不需要
+                    webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);//当HTTP的状态非200时是否抛出异常, 这里选择不需要
+                    webClient.getOptions().setActiveXNative(false);
+                    webClient.getOptions().setCssEnabled(false);//是否启用CSS, 因为不需要展现页面, 所以不需要启用
+                    webClient.getOptions().setJavaScriptEnabled(true); //很重要，启用JS
+                    webClient.setAjaxController(new NicelyResynchronizingAjaxController());//很重要，设置支持AJAX
                     HtmlPage page = null;
-                    page = webClient.getPage(urlEntity.getConnectUrl());
+                    try {
+                        page = webClient.getPage(urlEntity.getConnectUrl());
+                    }catch (Exception e){
+                        throw e;
+                    }finally {
+                        webClient.close();
+                    }
                     webClient.waitForBackgroundJavaScript(3000);//异步JS执行需要耗时,所以这里线程要阻塞3秒,等待异步JS执行结束
                     String pageXml = page.asXml();//直接将加载完成的页面转换成xml格式的字符串
                     document = Jsoup.parse(pageXml);//获取html文档
                     document.setBaseUri(urlEntity.getRootUrl());
+                } else if(isActiveNode == 2){ //使用phantomjsDriver无头浏览器加载动态js页面，可以取代1的情况了，哈哈
+                    StopLoadPage loadPageThread = new StopLoadPage(webDriver,5);
+                    loadPageThread.start();
+                    webDriver.get(urlEntity.getConnectUrl());
+                    WebDriverWait wait = new WebDriverWait(webDriver, 5);
+                    String locate = recordFilter.getRootTag() + " " + recordFilter.getRecordBodyTag();
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector(locate)));
+                    document = Jsoup.parse(webDriver.getPageSource());
+                    document.setBaseUri(urlEntity.getRootUrl());
+                    loadPageThread.interrupt();
                 } else {
                     Integer timeOutLen = 0;
                     if (urlEntity.getIsTranslate() == 0){
@@ -127,6 +159,7 @@ public class NetInformationServiceImpl implements NetInformationService {
                     //超时重连5次
                     while (document == null && connTimes <= 5){
                         try {
+                            HttpUtil.trustEveryone();
                             document = Jsoup.connect(urlEntity.getConnectUrl()).maxBodySize(0).timeout(timeOutLen).get();
                         }catch (Exception e){
                             if(connTimes++ == 5){

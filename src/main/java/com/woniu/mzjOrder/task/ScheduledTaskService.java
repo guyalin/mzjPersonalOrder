@@ -26,8 +26,9 @@ public class ScheduledTaskService {
     private void updateNetArticleRecord(){
         try {
             //全量更新
-            netInformationService.loadNetNewsArticleToDB(null);
             log.info("taskScheduled start...");
+            netInformationService.loadNetNewsArticleToDB(null);
+            log.info("taskScheduled end...");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,6 +1,7 @@
 package com.woniu.mzjOrder.entity;
 
 import com.woniu.mzjOrder.filter.SecurityUserHelper;
+import com.woniu.mzjOrder.util.DateUtil;
 import com.woniu.mzjOrder.util.UUIDUtil;
 import com.woniu.mzjOrder.vo.NetLabelVo;
 import lombok.Data;
@@ -25,9 +26,11 @@ public class NetLabelEntity {
         NetLabelEntity netLabelEntity = new NetLabelEntity();
         if (StringUtils.isBlank(netLabelVo.getLabelId())){
             netLabelEntity.setLabelId(UUIDUtil.getUUID32());
-        }else
+            netLabelEntity.setCreateTime(DateUtil.longToString(System.currentTimeMillis()));
+        }else{
             netLabelEntity.setLabelId(netLabelVo.getLabelId());
-        netLabelEntity.setCreateTime(netLabelVo.getCreateTime());
+            netLabelEntity.setCreateTime(netLabelVo.getCreateTime());
+        }
         netLabelEntity.setLabelName(netLabelVo.getLabelName());
         netLabelEntity.setNetList(netLabelVo.getNetList());
         netLabelEntity.setCreateUserId(SecurityUserHelper.getCurrentPrincipal().getUsername());

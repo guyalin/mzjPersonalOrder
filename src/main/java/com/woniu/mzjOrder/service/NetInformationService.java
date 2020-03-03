@@ -39,6 +39,7 @@ public interface NetInformationService {
         List<UrlMonitorEntity> monitorEntities = new ArrayList<>();
         NetChildFilter childDocumentRule = parentUrlEntity.getNetChildFilter();
         ArticleRecordFilter articleRecordFilter = parentUrlEntity.getArticleRecordFilter();
+        String urlId = parentUrlEntity.getUrlId();
         String parentName = parentUrlEntity.getName();
         String parentArea = parentUrlEntity.getArea();
         Integer isNeedTranslate = parentUrlEntity.getIsTranslate();
@@ -66,7 +67,7 @@ public interface NetInformationService {
         for (Element childRecord : childRecords) {
             String childName = parentName.concat("-").concat(DocumentUtil.getLocationText(childRecord, nameLocation, childNameTag, childNameTagIndex, nameAttr));
             String childRootUrl = DocumentUtil.getLocationText(childRecord, childRootUrlLocation, childRootUrlTag, childRootUrlTagIndex, urlAttrName);
-            UrlMonitorEntity urlMonitorEntity = new UrlMonitorEntity(entityArea, childName, childRootUrl, childRootUrl,isNeedTranslate);
+            UrlMonitorEntity urlMonitorEntity = new UrlMonitorEntity(urlId, entityArea, childName, childRootUrl, childRootUrl,isNeedTranslate);
             urlMonitorEntity.setArticleRecordFilter(articleRecordFilter);
             monitorEntities.add(urlMonitorEntity);
         }

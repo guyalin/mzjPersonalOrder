@@ -4,6 +4,7 @@ import com.woniu.mzjOrder.entity.AuthPrivilege;
 import com.woniu.mzjOrder.entity.AuthRole;
 import com.woniu.mzjOrder.entity.AuthUser;
 import com.woniu.mzjOrder.entity.AuthUserInfo;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,6 @@ public interface UserPrivilegeDao {
     List<AuthRole> queryRoleByUser(AuthUser user);
 
     List<AuthPrivilege> queryPrivilegeByRole(String roleIds);
+
+    Integer saveOrUpdUserInfo(@Param("authUser") AuthUser authUser);
 }

@@ -145,4 +145,17 @@ public class AuthUserServiceImpl implements AuthUserService {
         return userPrivilegeDao.queryPrivilegeByRole(roles);
 
     }
+
+    @Override
+    public Integer saveOrUpdUser(AuthUser authUser){
+        String userId = authUser.getUserId();
+        String pwStr = authUser.getUserPassWd();
+        if (StringUtils.isBlank(pwStr) || StringUtils.isBlank(userId)){
+            return 0;
+        }
+        String hashPW = passwordEncoder.encode(pwStr);
+        authUser.setUserPassWd(hashPW);
+        Integer cnt = userPrivilegeDao.saveOrUpdUserInfo(authUser);
+        return cnt;
+    }
 }

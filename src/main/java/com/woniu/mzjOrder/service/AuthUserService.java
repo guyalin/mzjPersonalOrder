@@ -26,4 +26,6 @@ public interface AuthUserService {
 
     List<AuthPrivilege> getPrivilegeByRoles(List<AuthRole> authRoles);
 
+    Integer saveOrUpdUser(AuthUser authUser);
+
 }

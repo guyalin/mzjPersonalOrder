@@ -6,9 +6,11 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.woniu.mzjOrder.Bo.LocalFileWriterBean;
 import com.woniu.mzjOrder.service.DocumentProcessor;
 import com.woniu.mzjOrder.service.processor.*;
+import com.woniu.mzjOrder.util.SeleniumUtil;
 import com.woniu.mzjOrder.vo.ChildDocumentRule;
 import com.woniu.mzjOrder.vo.NetInfoRuleMapBean;
 import com.woniu.mzjOrder.vo.TextLocationEnum;
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -124,5 +126,11 @@ public class NetInfoRuleBeanConfig {
         webClient.getOptions().setJavaScriptEnabled(true); //很重要，启用JS
         webClient.setAjaxController(new NicelyResynchronizingAjaxController());//很重要，设置支持AJAX
         return webClient;
+    }
+
+    @Bean(name = "phantomJsDriver")
+    public WebDriver phantomJS(@Value("${phantomjs.server-path}") String toolPath){
+        WebDriver webDriver = SeleniumUtil.getSeleniumDriver(toolPath);
+        return webDriver;
     }
 }
